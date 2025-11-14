@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Product": {
@@ -27,6 +28,14 @@
           "description": "URL of the product image.",
           "format": "uri"
         },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "An array of URLs for product images."
+        },
         "category": {
           "type": "string",
           "description": "Category the product belongs to (e.g., Stoles & Sashes, Full Cloths)."
@@ -38,6 +47,14 @@
         "occasion": {
           "type": "string",
           "description": "Occasion the product is suitable for."
+        },
+        "story": {
+          "type": "string",
+          "description": "The story or meaning behind the Kente pattern."
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "Indicates if the product should be featured on the homepage."
         }
       },
       "required": [

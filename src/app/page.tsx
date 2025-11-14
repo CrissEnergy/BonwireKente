@@ -15,7 +15,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 
 export default function Home() {
@@ -24,11 +24,11 @@ export default function Home() {
   
   const productsQuery = useMemoFirebase(() => {
       if (!firestore) return null;
-      return collection(firestore, 'products');
+      // Query for products where 'featured' is true
+      return query(collection(firestore, 'products'), where("featured", "==", true));
   }, [firestore]);
 
-  const { data: products, isLoading } = useCollection<Product>(productsQuery);
-  const featuredProducts = products ? products.slice(0, 4) : [];
+  const { data: featuredProducts, isLoading } = useCollection<Product>(productsQuery);
 
   const homeCarouselImages = [
     PlaceHolderImages.find(img => img.id === 'homepage-carousel-1'),
@@ -80,7 +80,7 @@ export default function Home() {
             </div>
         ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map(product => (
+            {featuredProducts && featuredProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
             ))}
             </div>

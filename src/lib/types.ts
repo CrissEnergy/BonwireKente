@@ -10,6 +10,7 @@ export interface Product {
   imageUrl: string; // The primary image URL
   category: 'Stoles & Sashes' | 'Full Cloths' | 'Accessories' | 'Ready-to-Wear';
   tags: ('Unisex' | 'For Men' | 'For Women' | 'Wedding' | 'Festival' | 'Everyday' | 'Traditional' | 'Naming Ceremony')[];
+  featured?: boolean;
 }
 
 export const CURRENCIES = {

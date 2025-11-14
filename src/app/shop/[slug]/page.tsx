@@ -8,8 +8,6 @@ import { ProductGallery } from '@/components/products/ProductGallery';
 import { Separator } from '@/components/ui/separator';
 import { AddToCartButton } from '@/components/products/AddToCartButton';
 import { WishlistButton } from '@/components/products/WishlistButton';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ProductPrice } from '@/components/products/ProductPrice';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,7 +23,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
   const productRef = useMemoFirebase(() => {
     if (!firestore || !slug) return null;
-    // We assume slug is the document ID for simplicity
     return doc(firestore, 'products', slug);
   }, [firestore, slug]);
 
@@ -81,7 +78,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
         <div className="absolute inset-0 bg-black/30" />
         <div className="relative z-10 container py-12">
             <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-                <ProductGallery images={product.images} name={product.name}/>
+                <ProductGallery images={product.images || [product.imageUrl]} name={product.name}/>
                 
                 <Card className="bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
                     <CardContent className="p-6 space-y-6">
@@ -102,12 +99,14 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                         
                         <Separator />
 
-                        <div className="space-y-6">
-                            <div>
-                                <h3 className="font-headline text-xl font-bold mb-2">The Story Behind the Weave</h3>
-                                <p className="text-muted-foreground whitespace-pre-wrap">{product.story}</p>
+                        {product.story && (
+                            <div className="space-y-6">
+                                <div>
+                                    <h3 className="font-headline text-xl font-bold mb-2">The Story Behind the Weave</h3>
+                                    <p className="text-muted-foreground whitespace-pre-wrap">{product.story}</p>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

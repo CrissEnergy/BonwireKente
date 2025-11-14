@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,6 +34,7 @@ const productSchema = z.object({
   tags: z.array(z.string()).refine(value => value.some(item => item), {
     message: 'You have to select at least one tag.',
   }),
+  featured: z.boolean().default(false).optional(),
 });
 
 interface EditProductFormProps {
@@ -55,6 +57,7 @@ export function EditProductForm({ product }: EditProductFormProps) {
       story: product.story,
       category: product.category,
       tags: product.tags,
+      featured: product.featured || false,
     },
   });
 
@@ -65,6 +68,9 @@ export function EditProductForm({ product }: EditProductFormProps) {
         if (!firestore) throw new Error("Firestore not available");
         const productDocRef = doc(firestore, 'products', product.id);
 
+        // Note: Image editing is not handled in this form.
+        // That would require a more complex implementation for uploading new files,
+        // deleting old ones, and re-ordering.
         const productData = {
           ...values,
         };
@@ -99,13 +105,17 @@ export function EditProductForm({ product }: EditProductFormProps) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             
-            <div className="grid grid-cols-4 gap-4">
-                {product.images.map((imageUrl, index) => (
-                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
-                        <Image src={imageUrl} alt={`Product image ${index + 1}`} fill className="object-cover" />
-                    </div>
-                ))}
-            </div>
+            <FormItem>
+              <FormLabel>Current Images</FormLabel>
+              <FormDescription>Image management (add/remove/reorder) is not available in this form. To change images, please re-add the product.</FormDescription>
+              <div className="grid grid-cols-4 gap-4 pt-2">
+                  {product.images.map((imageUrl, index) => (
+                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
+                          <Image src={imageUrl} alt={`Product image ${index + 1}`} fill className="object-cover" />
+                      </div>
+                  ))}
+              </div>
+            </FormItem>
             
             <div className="grid md:grid-cols-2 gap-8">
               <FormField
@@ -193,7 +203,7 @@ export function EditProductForm({ product }: EditProductFormProps) {
               name="story"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Story</FormLabel>
+                  <FormLabel>The Story Behind the Weave</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Tell the story behind the pattern..." {...field} rows={4} />
                   </FormControl>
@@ -251,6 +261,27 @@ export function EditProductForm({ product }: EditProductFormProps) {
                   <FormMessage />
                 </FormItem>
               )}
+            />
+
+            <FormField
+                control={form.control}
+                name="featured"
+                render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-background/20">
+                    <div className="space-y-0.5">
+                        <FormLabel className="text-base">Feature Product</FormLabel>
+                        <FormDescription>
+                        Feature this product on the homepage.
+                        </FormDescription>
+                    </div>
+                    <FormControl>
+                        <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        />
+                    </FormControl>
+                    </FormItem>
+                )}
             />
 
 

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,6 +38,7 @@ const productSchema = z.object({
     message: 'You have to select at least one tag.',
   }),
   images: z.array(fileSchema).min(1, 'Please upload at least one image.'),
+  featured: z.boolean().default(false).optional(),
 });
 
 export function AddProductForm() {
@@ -56,6 +58,7 @@ export function AddProductForm() {
       story: '',
       tags: [],
       images: [],
+      featured: false,
     },
   });
 
@@ -63,8 +66,14 @@ export function AddProductForm() {
     setIsSubmitting(true);
     
     try {
+        if (!firestore || !storage) {
+            throw new Error("Firebase services not available.");
+        }
         const productCollectionRef = collection(firestore, 'products');
-        const newProductId = uuidv4();
+        
+        // Firestore creates the ID, so we can use it for the storage path
+        const newDocRef = doc(productCollectionRef);
+        const newProductId = newDocRef.id;
 
         const imageUrls = await Promise.all(
             values.images.map(async (imageFile) => {
@@ -74,17 +83,13 @@ export function AddProductForm() {
             })
         );
         
-        // This is a simplified version. We're storing URLs directly.
-        // In a real app, you might want a more structured way to link images.
-        // The first image URL will be the primary one.
         const productData = {
           ...values,
           id: newProductId,
-          images: imageUrls, // Overwrite with URLs
-          imageUrl: imageUrls[0] || '' // For compatibility with existing product type
+          images: imageUrls,
+          imageUrl: imageUrls[0] || ''
         };
         
-        // Using non-blocking update
         await addDocumentNonBlocking(productCollectionRef, productData);
         
         toast({
@@ -200,7 +205,7 @@ export function AddProductForm() {
               name="story"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Story</FormLabel>
+                  <FormLabel>The Story Behind the Weave</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Tell the story behind the pattern..." {...field} rows={4} />
                   </FormControl>
@@ -209,7 +214,7 @@ export function AddProductForm() {
               )}
             />
 
-            <FormField
+             <FormField
               control={form.control}
               name="images"
               render={({ field }) => (
@@ -224,7 +229,7 @@ export function AddProductForm() {
                     />
                   </FormControl>
                   <FormDescription>
-                    Upload one or more images for the product.
+                    Upload one or more images for the product. The first image will be the main display image.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -280,6 +285,27 @@ export function AddProductForm() {
                   <FormMessage />
                 </FormItem>
               )}
+            />
+
+            <FormField
+                control={form.control}
+                name="featured"
+                render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-background/20">
+                    <div className="space-y-0.5">
+                        <FormLabel className="text-base">Feature Product</FormLabel>
+                        <FormDescription>
+                        Feature this product on the homepage.
+                        </FormDescription>
+                    </div>
+                    <FormControl>
+                        <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        />
+                    </FormControl>
+                    </FormItem>
+                )}
             />
 
 
