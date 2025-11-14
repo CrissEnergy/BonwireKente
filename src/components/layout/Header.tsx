@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -13,7 +14,7 @@ import { LiveSearch } from './LiveSearch';
 import { ThemeToggle } from './ThemeToggle';
 
 export function Header() {
-  const { cartItemCount, currency, setCurrency } = useAppContext();
+  const { cartItemCount, currency, setCurrency, wishlistItemCount } = useAppContext();
   const navLinks = [
     { href: '/shop', label: 'Shop' },
     { href: '/kente-guide', label: 'Kente Guide' },
@@ -107,8 +108,13 @@ export function Header() {
             </Button>
           </Link>
           <Link href="/wishlist" passHref>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="relative">
               <Heart className="h-5 w-5" />
+              {wishlistItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs">
+                  {wishlistItemCount}
+                </span>
+              )}
               <span className="sr-only">Wishlist</span>
             </Button>
           </Link>

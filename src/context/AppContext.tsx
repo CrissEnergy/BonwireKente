@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Product, Currency } from '@/lib/types';
@@ -20,6 +21,7 @@ interface AppContextType {
   toggleWishlist: (product: Product) => void;
   isInWishlist: (productId: string) => boolean;
   cartItemCount: number;
+  wishlistItemCount: number;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -76,6 +78,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const cartItemCount = cart.reduce((count, item) => count + item.quantity, 0);
+  const wishlistItemCount = wishlist.length;
 
   const contextValue = useMemo(() => ({
     cart,
@@ -88,7 +91,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     updateCartQuantity,
     toggleWishlist,
     isInWishlist,
-    cartItemCount
+    cartItemCount,
+    wishlistItemCount,
   }), [cart, wishlist, currency]);
 
   return (
