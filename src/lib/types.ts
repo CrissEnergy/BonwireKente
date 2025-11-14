@@ -12,7 +12,6 @@ export interface Product {
   price: ProductPrice; // Changed from number to ProductPrice object
   description: string;
   story: string;
-  images: string[];
   imageUrl: string;
   category: 'Stoles & Sashes' | 'Full Cloths' | 'Accessories' | 'Ready-to-Wear';
   tags: ('Unisex' | 'For Men' | 'For Women' | 'Wedding' | 'Festival' | 'Everyday' | 'Traditional' | 'Naming Ceremony')[];
@@ -48,3 +47,5 @@ export interface Order {
     status: OrderStatus;
     items: OrderItem[];
 }
+
+    

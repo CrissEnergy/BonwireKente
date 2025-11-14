@@ -109,14 +109,14 @@ export function EditProductForm({ product }: EditProductFormProps) {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             
             <FormItem>
-              <FormLabel>Current Images</FormLabel>
-              <FormDescription>To change images, please create a new product. Image editing is not supported on this form.</FormDescription>
+              <FormLabel>Current Image</FormLabel>
+              <FormDescription>To change the image, please create a new product. Image editing is not supported on this form.</FormDescription>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
-                  {product.images && product.images.map((imageUrl, index) => (
-                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-white/20">
-                          <Image src={imageUrl} alt={`Product image ${index + 1}`} fill className="object-cover" />
+                  {product.imageUrl && (
+                      <div className="relative aspect-square rounded-lg overflow-hidden border border-white/20">
+                          <Image src={product.imageUrl} alt={`Product image`} fill className="object-cover" />
                       </div>
-                  ))}
+                  )}
               </div>
             </FormItem>
             

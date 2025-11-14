@@ -34,14 +34,6 @@
           "description": "URL of the product image.",
           "format": "uri"
         },
-        "images": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "format": "uri"
-          },
-          "description": "An array of URLs for product images."
-        },
         "category": {
           "type": "string",
           "description": "Category the product belongs to (e.g., Stoles & Sashes, Full Cloths)."
@@ -408,3 +400,5 @@
     "reasoning": "The Firestore data structure is designed to support the BonwiriKentey e-commerce platform, focusing on security, scalability, and ease of maintenance. Authorization Independence is achieved by structuring data around user-owned data and avoiding hierarchical `get()` calls in security rules. Path-based ownership is used where possible, particularly for user-specific data. For collaborative data scenarios (not explicitly mentioned in the requirements but anticipated), a membership map approach would be used, with denormalization to ensure authorization independence.\n\nThe structure uses structural segregation by keeping data with similar security needs together.  For example, user profiles are stored under `/users/{userId}`, ensuring that all documents under that path share the same access control requirements.\n\nQAPs (Rules Are Not Filters) are supported by the segregation of data based on access needs. For example, all documents in the `/users/{userId}/carts` collection are accessible only to the user with the corresponding `userId`.  This simplifies security rules and avoids the need to filter data based on authorization criteria within the rules themselves.\n\nExplicit state modeling is encouraged (although not directly reflected in the provided entities) through the use of a `status` field for entities like Orders, enabling clear tracking of order states (e.g., `PENDING`, `PROCESSING`, `SHIPPED`, `DELIVERED`)."
   }
 }
+
+    

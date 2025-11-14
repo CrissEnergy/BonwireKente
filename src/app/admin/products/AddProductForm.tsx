@@ -41,12 +41,11 @@ const productSchema = z.object({
   tags: z.array(z.string()).refine(value => value.some(item => item), {
     message: 'You have to select at least one tag.',
   }),
-  imageUrls: z.string().optional(),
+  imageUrl: z.string().optional(),
   featured: z.boolean().default(false).optional(),
 });
 
 type ImageSource = {
-  id: string;
   type: 'url' | 'file';
   value: string | File;
   preview: string;
@@ -56,8 +55,7 @@ export function AddProductForm() {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imageSources, setImageSources] = useState<ImageSource[]>([]);
-  const [featuredImageId, setFeaturedImageId] = useState<string | null>(null);
+  const [imageSource, setImageSource] = useState<ImageSource | null>(null);
   
   const firestore = useFirestore();
   const storage = useStorage();
@@ -71,70 +69,51 @@ export function AddProductForm() {
       description: '',
       story: '',
       tags: [],
-      imageUrls: '',
+      imageUrl: '',
       featured: false,
     },
   });
   
-  const urlInput = form.watch('imageUrls');
+  const urlInput = form.watch('imageUrl');
   useEffect(() => {
-    const urls = urlInput?.split('\n').filter(url => url.trim() !== '') || [];
-    const newUrlSources = urls.map(url => ({
-      id: `url-${url}`,
-      type: 'url' as const,
-      value: url,
-      preview: url
-    }));
-    
-    setImageSources(prev => {
-        const fileSources = prev.filter(s => s.type === 'file');
-        const existingUrlIds = new Set(newUrlSources.map(s => s.id));
-        const oldUrlSources = prev.filter(s => s.type === 'url' && existingUrlIds.has(s.id));
-        const uniqueNewUrlSources = newUrlSources.filter(s => !prev.some(p => p.id === s.id));
-        return [...fileSources, ...oldUrlSources, ...uniqueNewUrlSources];
-    });
-
-  }, [urlInput]);
-
-  useEffect(() => {
-    if (imageSources.length > 0 && !featuredImageId) {
-      setFeaturedImageId(imageSources[0].id);
-    }
-    if(imageSources.length === 0){
-        setFeaturedImageId(null);
-    }
-  }, [imageSources, featuredImageId]);
+      if (urlInput && (!imageSource || imageSource.type !== 'file')) {
+          setImageSource({
+              type: 'url',
+              value: urlInput,
+              preview: urlInput
+          });
+      }
+  }, [urlInput, imageSource]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const newFileSources: ImageSource[] = files.map(file => ({
-      id: `file-${uuidv4()}`,
-      type: 'file',
-      value: file,
-      preview: URL.createObjectURL(file)
-    }));
-    setImageSources(prev => [...prev, ...newFileSources]);
+    const file = event.target.files?.[0];
+    if (file) {
+      if(imageSource && imageSource.type === 'file') {
+        URL.revokeObjectURL(imageSource.preview);
+      }
+      setImageSource({
+        type: 'file',
+        value: file,
+        preview: URL.createObjectURL(file)
+      });
+      form.setValue('imageUrl', ''); // Clear URL input if a file is chosen
+    }
   };
 
-  const removeImage = (id: string) => {
-    const imageToRemove = imageSources.find(img => img.id === id);
-    if(imageToRemove && imageToRemove.type === 'file'){
-        URL.revokeObjectURL(imageToRemove.preview);
+  const removeImage = () => {
+    if(imageSource && imageSource.type === 'file'){
+        URL.revokeObjectURL(imageSource.preview);
     }
-
-    setImageSources(prev => prev.filter(s => s.id !== id));
-    if (featuredImageId === id) {
-        const remainingImages = imageSources.filter(s => s.id !== id);
-        setFeaturedImageId(remainingImages.length > 0 ? remainingImages[0].id : null);
-    }
+    setImageSource(null);
+    form.setValue('imageUrl', '');
   };
 
   async function onSubmit(values: z.infer<typeof productSchema>) {
-    if (imageSources.length === 0) {
+    if (!imageSource) {
         toast({
             variant: "destructive",
-            title: "No Images",
-            description: "Please add at least one image for the product.",
+            title: "No Image",
+            description: "Please add an image for the product.",
         });
         return;
     }
@@ -146,25 +125,14 @@ export function AddProductForm() {
         const newDocRef = doc(collection(firestore, 'products'));
         const newProductId = newDocRef.id;
 
-        const uploadPromises = imageSources.map(source => {
-            if (source.type === 'file') {
-                const file = source.value as File;
-                const imageRef = ref(storage, `products/${newProductId}/${uuidv4()}-${file.name}`);
-                return uploadBytes(imageRef, file).then(snapshot => getDownloadURL(snapshot.ref));
-            }
-            return Promise.resolve(source.value as string);
-        });
-
-        const uploadedUrls = await Promise.all(uploadPromises);
-        
-        const featuredImageSource = imageSources.find(s => s.id === featuredImageId);
-        let featuredImageUrl = '';
-
-        if(featuredImageSource){
-            const featuredIndex = imageSources.indexOf(featuredImageSource);
-            featuredImageUrl = uploadedUrls[featuredIndex];
+        let finalImageUrl: string;
+        if(imageSource.type === 'file') {
+            const file = imageSource.value as File;
+            const imageRef = ref(storage, `products/${newProductId}/${uuidv4()}-${file.name}`);
+            const snapshot = await uploadBytes(imageRef, file);
+            finalImageUrl = await getDownloadURL(snapshot.ref);
         } else {
-            featuredImageUrl = uploadedUrls[0];
+            finalImageUrl = imageSource.value as string;
         }
 
         const productData = {
@@ -177,8 +145,7 @@ export function AddProductForm() {
           category: values.category,
           tags: values.tags,
           featured: values.featured,
-          imageUrl: featuredImageUrl,
-          images: uploadedUrls,
+          imageUrl: finalImageUrl,
         };
         
         await setDoc(newDocRef, productData);
@@ -189,9 +156,8 @@ export function AddProductForm() {
         });
         
         form.reset();
-        imageSources.forEach(s => { if (s.type === 'file') URL.revokeObjectURL(s.preview) });
-        setImageSources([]);
-        setFeaturedImageId(null);
+        if(imageSource && imageSource.type === 'file') URL.revokeObjectURL(imageSource.preview);
+        setImageSource(null);
         router.push('/admin/products');
         router.refresh();
 
@@ -279,49 +245,39 @@ export function AddProductForm() {
             )}/>
              
              <div className="space-y-4">
-                <Label>Product Images</Label>
+                <Label>Product Image</Label>
                 <div className="p-4 border-2 border-dashed border-muted rounded-lg text-center">
                     <Label htmlFor="file-upload" className="cursor-pointer inline-flex items-center justify-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-                        <Upload className="mr-2 h-4 w-4" /> Upload Files
+                        <Upload className="mr-2 h-4 w-4" /> Upload File
                     </Label>
-                    <Input id="file-upload" type="file" multiple onChange={handleFileChange} className="hidden" accept="image/*" />
+                    <Input id="file-upload" type="file" onChange={handleFileChange} className="hidden" accept="image/*" />
                 </div>
-                 <FormField control={form.control} name="imageUrls" render={({ field }) => (
+                 <FormField control={form.control} name="imageUrl" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>...or Paste Image URLs</FormLabel>
-                      <FormControl><Textarea placeholder="Paste one image URL per line" {...field} rows={4} /></FormControl>
+                      <FormLabel>...or Paste Image URL</FormLabel>
+                      <FormControl><Input placeholder="Paste image URL" {...field} /></FormControl>
                     </FormItem>
                   )}/>
-                 <FormDescription>
-                    You can upload files or paste URLs. Click an image preview below to set it as the featured image.
-                 </FormDescription>
              </div>
 
-            {imageSources.length > 0 && (
+            {imageSource && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                {imageSources.map((source, index) => (
-                  <div key={source.id} className="relative group">
-                    <button
-                        type="button"
-                        onClick={() => setFeaturedImageId(source.id)}
-                        className={cn(
-                            "relative aspect-square rounded-lg overflow-hidden border-4 transition-colors w-full",
-                            featuredImageId === source.id ? "border-primary" : "border-transparent"
-                        )}
+                  <div className="relative group">
+                    <div
+                        className="relative aspect-square rounded-lg overflow-hidden border-4 border-primary w-full"
                     >
-                        <Image src={source.preview} alt={`Preview ${index + 1}`} fill className="object-cover" />
-                    </button>
+                        <Image src={imageSource.preview} alt="Preview" fill className="object-cover" />
+                    </div>
                     <Button 
                         type="button" 
                         variant="destructive" 
                         size="icon" 
                         className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeImage(source.id)}
+                        onClick={removeImage}
                     >
                         <X className="h-4 w-4" />
                     </Button>
                   </div>
-                ))}
               </div>
             )}
             
