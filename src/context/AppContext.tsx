@@ -4,8 +4,6 @@
 import type { Product, Currency, ProductPrice } from '@/lib/types';
 import { CURRENCIES } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react';
-import { useFirestore } from '@/firebase';
-import { seedDatabase } from '@/lib/seed';
 
 interface CartItem extends Product {
   quantity: number;
@@ -33,16 +31,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [currency, setCurrency] = useState<Currency>('USD');
-  const firestore = useFirestore();
-
-  useEffect(() => {
-    // This is a temporary effect to seed the database.
-    // It will be removed in the next step.
-    if (firestore) {
-      seedDatabase(firestore);
-    }
-  }, [firestore]);
-
 
   useEffect(() => {
     const fetchLocationAndSetCurrency = async () => {
