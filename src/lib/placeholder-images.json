@@ -71,6 +71,30 @@
       "description": "A colorful display of Kente cloth, showing intricate patterns.",
       "imageUrl": "https://images.unsplash.com/photo-1660695828403-b42e117e0b4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxrZW50ZSUyMGNsb3RofGVufDB8fHx8MTc2MzA4OTA3M3ww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "kente display"
+    },
+    {
+      "id": "about-carousel-1",
+      "description": "A man weaving Kente cloth on a traditional loom.",
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4z4c3qO69nrfE1Wh7FqGYRrJJbWkeKicnUfUEzvLE1pTZoCm02N13NC-_UWzPzOxXz_A&usqp=CAU",
+      "imageHint": "kente weaving"
+    },
+    {
+      "id": "about-carousel-2",
+      "description": "A wide shot of the Bonwire Kente village in Ghana.",
+      "imageUrl": "https://visitghana.com/wp-content/uploads/2025/04/8776-bonwire-kente-village.jpg",
+      "imageHint": "bonwire village"
+    },
+    {
+      "id": "about-carousel-3",
+      "description": "A close-up of a colorful Kente cloth pattern.",
+      "imageUrl": "https://reapp.com.gh/wp-content/uploads/2023/05/237696171.png",
+      "imageHint": "kente pattern"
+    },
+    {
+      "id": "about-carousel-4",
+      "description": "A collection of different Kente cloth designs.",
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEYPtJRjto66SgvxWJs4hFIa52PB21Dv909Q&s",
+      "imageHint": "kente designs"
     }
   ]
 }

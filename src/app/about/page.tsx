@@ -1,10 +1,29 @@
 
+'use client'
+
+import React from 'react';
 import Image from 'next/image';
+import Autoplay from "embla-carousel-autoplay"
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel"
 
 export default function AboutPage() {
-    const aboutImage = PlaceHolderImages.find(img => img.id === 'about-us-image');
     const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
+    const carouselImages = [
+        PlaceHolderImages.find(img => img.id === 'about-carousel-1'),
+        PlaceHolderImages.find(img => img.id === 'about-carousel-2'),
+        PlaceHolderImages.find(img => img.id === 'about-carousel-3'),
+        PlaceHolderImages.find(img => img.id === 'about-carousel-4'),
+    ].filter(Boolean); // Filter out any undefined images
+
+    const plugin = React.useRef(
+        Autoplay({ delay: 3000, stopOnInteraction: true })
+    )
 
     return (
         <div className="relative min-h-[calc(100vh-4rem)] w-full animate-fade-in-up">
@@ -30,17 +49,31 @@ export default function AboutPage() {
 
                 <div className="container pb-16 md:pb-24">
                     <div className="grid md:grid-cols-2 gap-12 items-center p-8 rounded-lg bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
-                        {aboutImage && (
-                             <div className="relative aspect-w-4 aspect-h-3 rounded-lg overflow-hidden shadow-lg">
-                                <Image
-                                    src={aboutImage.imageUrl}
-                                    alt={aboutImage.description}
-                                    fill
-                                    className="object-cover"
-                                    data-ai-hint={aboutImage.imageHint}
-                                />
-                            </div>
-                        )}
+                         <Carousel
+                            plugins={[plugin.current]}
+                            className="w-full"
+                            onMouseEnter={plugin.current.stop}
+                            onMouseLeave={plugin.current.reset}
+                            >
+                            <CarouselContent>
+                                {carouselImages.map((image, index) => image && (
+                                <CarouselItem key={index}>
+                                    <Card className="bg-transparent border-none">
+                                        <CardContent className="relative flex aspect-video items-center justify-center p-0">
+                                             <Image
+                                                src={image.imageUrl}
+                                                alt={image.description}
+                                                fill
+                                                className="object-contain rounded-lg"
+                                                data-ai-hint={image.imageHint}
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </CarouselItem>
+                                ))}
+                            </CarouselContent>
+                        </Carousel>
+
                         <div className="space-y-6 text-slate-200">
                             <p>Our journey began in the heart of the Ashanti Kingdom, where the rhythmic clatter of the loom has echoed for centuries. Witnessing the intricate process of Kente weaving—each thread chosen with purpose, each pattern imbued with meaning—we knew this was a story that needed to be told on a global stage.</p>
                             <p>We partner directly with master weavers and their families, ensuring that the traditions are honored and that the artisans are fairly compensated for their incredible skill. This direct relationship allows us to guarantee the authenticity and quality of every single piece we offer.</p>
