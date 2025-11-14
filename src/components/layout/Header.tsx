@@ -28,6 +28,21 @@ export function Header() {
     { href: '/contact', label: 'Contact' },
   ];
 
+  if (!isClient) {
+    return (
+      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg border-white/20">
+        <div className="container flex h-16 items-center">
+          <div className="mr-4 hidden md:flex">
+            <Link href="/" className="mr-6 flex items-center space-x-2">
+              <KentePatternIcon className="h-8 w-8" />
+              <span className="hidden font-bold sm:inline-block font-headline text-2xl">BonwireKente</span>
+            </Link>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg border-white/20">
       <div className="container flex h-16 items-center">
@@ -88,7 +103,7 @@ export function Header() {
 
 
         <div className="flex flex-1 items-center justify-end space-x-2">
-         {isClient && <ThemeToggle />}
+         <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="flex items-center gap-1">
@@ -116,7 +131,7 @@ export function Header() {
           <Link href="/wishlist" passHref>
             <Button variant="ghost" size="icon" className="relative">
               <Heart className="h-5 w-5" />
-              {isClient && wishlistItemCount > 0 && (
+              {wishlistItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs">
                   {wishlistItemCount}
                 </span>
@@ -127,7 +142,7 @@ export function Header() {
           <Link href="/cart" passHref>
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
-              {isClient && cartItemCount > 0 && (
+              {cartItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs">
                   {cartItemCount}
                 </span>
