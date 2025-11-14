@@ -4,10 +4,11 @@ import Link from 'next/link';
 import { ShoppingCart, Heart, User, Menu, Search, ChevronDown } from 'lucide-react';
 import { KentePatternIcon } from '@/components/icons/KentePatternIcon';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { useAppContext } from '@/context/AppContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Currency, CURRENCIES } from '@/lib/types';
+import { Fragment } from 'react';
 
 export function Header() {
   const { cartItemCount, currency, setCurrency } = useAppContext();
@@ -45,15 +46,23 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="bg-background/80 backdrop-blur-lg border-white/20">
-              <Link href="/" className="mr-6 flex items-center space-x-2 mb-6">
-                <KentePatternIcon className="h-8 w-8" />
-                <span className="font-bold font-headline text-2xl">BonwireKente</span>
-              </Link>
-              <nav className="flex flex-col space-y-4">
+              <SheetHeader className="border-b pb-4 mb-4">
+                  <SheetTitle>
+                    <Link href="/" className="mr-6 flex items-center space-x-2">
+                      <KentePatternIcon className="h-8 w-8" />
+                      <span className="font-bold font-headline text-2xl">BonwireKente</span>
+                    </Link>
+                  </SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col space-y-2">
                 {navLinks.map(link => (
-                  <Link key={link.href} href={link.href} className="text-lg transition-colors hover:text-primary">
-                    {link.label}
-                  </Link>
+                  <Fragment key={link.href}>
+                    <SheetClose asChild>
+                      <Link href={link.href} className="text-lg transition-colors hover:text-primary p-2 rounded-md">
+                        {link.label}
+                      </Link>
+                    </SheetClose>
+                  </Fragment>
                 ))}
               </nav>
             </SheetContent>
