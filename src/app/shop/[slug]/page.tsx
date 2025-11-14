@@ -4,7 +4,6 @@
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { ProductCard } from '@/components/products/ProductCard';
-import { ProductGallery } from '@/components/products/ProductGallery';
 import { Separator } from '@/components/ui/separator';
 import { AddToCartButton } from '@/components/products/AddToCartButton';
 import { WishlistButton } from '@/components/products/WishlistButton';
@@ -79,7 +78,22 @@ export default function ProductPage() {
         <div className="absolute inset-0 bg-black/30" />
         <div className="relative z-10 container py-12">
             <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-                <ProductGallery images={product.images || [product.imageUrl]} name={product.name}/>
+                <Card className="overflow-hidden group bg-card/60 backdrop-blur-sm border-white/20">
+                    <CardContent className="p-0">
+                        <div className="aspect-w-1 aspect-h-1 relative">
+                        {product.imageUrl && (
+                            <Image
+                                src={product.imageUrl}
+                                alt={product.name}
+                                fill
+                                className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                priority
+                            />
+                        )}
+                        </div>
+                    </CardContent>
+                </Card>
                 
                 <Card className="bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
                     <CardContent className="p-6 space-y-6">
