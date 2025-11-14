@@ -13,18 +13,20 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirestore, useStorage } from '@/firebase';
 import { addDoc, collection, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import Image from 'next/image';
 
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'] as const;
 const availableTags = ['Unisex', 'For Men', 'For Women', 'Wedding', 'Festival', 'Everyday', 'Traditional', 'Naming Ceremony'] as const;
 
 // Define a schema for a single file, ensuring it is a File object
-const fileSchema = z.instanceof(File, { message: 'Please upload a file.' });
+const fileSchema = z.custom<File>(val => val instanceof File, 'Please upload a file.');
+
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters.'),
@@ -44,6 +46,7 @@ export function AddProductForm() {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const firestore = useFirestore();
   const storage = useStorage();
 
@@ -61,6 +64,22 @@ export function AddProductForm() {
     },
   });
 
+  const imageFiles = form.watch('images');
+
+  useEffect(() => {
+    let newImagePreviews: string[] = [];
+    if (imageFiles && imageFiles.length > 0) {
+      newImagePreviews = imageFiles.map(file => URL.createObjectURL(file));
+      setImagePreviews(newImagePreviews);
+    } else {
+      setImagePreviews([]);
+    }
+
+    return () => {
+      newImagePreviews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [imageFiles]);
+
   async function onSubmit(values: z.infer<typeof productSchema>) {
     setIsSubmitting(true);
     
@@ -69,7 +88,6 @@ export function AddProductForm() {
             throw new Error("Firebase services not available.");
         }
         
-        // Firestore creates the ID, so we can use it for the storage path
         const newDocRef = doc(collection(firestore, 'products'));
         const newProductId = newDocRef.id;
 
@@ -85,10 +103,9 @@ export function AddProductForm() {
           ...values,
           id: newProductId,
           images: imageUrls,
-          imageUrl: imageUrls[0] || '' // Set the first image as the main one
+          imageUrl: imageUrls[0] || ''
         };
         
-        // Use setDoc with the generated ID
         await setDocumentNonBlocking(newDocRef, productData, {});
         
         toast({
@@ -97,6 +114,7 @@ export function AddProductForm() {
         });
         
         form.reset();
+        setImagePreviews([]);
         router.push('/admin/products');
         router.refresh();
 
@@ -226,16 +244,29 @@ export function AddProductForm() {
                         type="file" 
                         multiple 
                         accept="image/*"
-                        onChange={(e) => field.onChange(e.target.files ? Array.from(e.target.files) : [])}
+                        onChange={(e) => {
+                            const files = e.target.files ? Array.from(e.target.files) : [];
+                            field.onChange(files);
+                        }}
                     />
                   </FormControl>
                   <FormDescription>
-                    Upload one or more images for the product. The first image will be the main display image.
+                    Upload up to 5 images. The first image will be the main display image.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {imagePreviews.map((previewUrl, index) => (
+                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-white/20">
+                    <Image src={previewUrl} alt={`Preview ${index + 1}`} fill className="object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
             
             <FormField
               control={form.control}
@@ -322,3 +353,5 @@ export function AddProductForm() {
     </Card>
   );
 }
+
+    
