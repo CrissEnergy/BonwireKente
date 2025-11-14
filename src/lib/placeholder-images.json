@@ -63,8 +63,14 @@
     {
       "id": "kente-guide-image",
       "description": "Close-up of a Kente pattern.",
-      "imageUrl": "https://picsum.photos/seed/kente-guide/1200/800",
+      "imageUrl": "https://images.unsplash.com/photo-1761515315519-7fa1af1d3e06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxrZW50ZSUyMHBhdHRlcm58ZW58MHx8fHwxNzYyOTg5MTU2fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "kente detail"
+    },
+    {
+      "id": "kente-insights-image",
+      "description": "A colorful display of Kente cloth, showing intricate patterns.",
+      "imageUrl": "https://images.unsplash.com/photo-1660695828403-b42e117e0b4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxrZW50ZSUyMGNsb3RofGVufDB8fHx8MTc2MzA4OTA3M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kente display"
     }
   ]
 }

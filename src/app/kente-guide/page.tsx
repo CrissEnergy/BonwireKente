@@ -1,9 +1,6 @@
 import { KenteGuideClient } from "./KenteGuideClient";
-import Image from "next/image";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function KenteGuidePage() {
-  const guideImage = PlaceHolderImages.find(img => img.id === 'kente-guide-image');
 
   return (
     <div className="container py-12">
@@ -14,23 +11,8 @@ export default function KenteGuidePage() {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-5 gap-8">
-        <div className="md:col-span-2">
-          {guideImage && (
-            <div className="relative aspect-w-4 aspect-h-3 rounded-lg overflow-hidden shadow-lg">
-              <Image
-                src={guideImage.imageUrl}
-                alt={guideImage.description}
-                fill
-                className="object-cover"
-                data-ai-hint={guideImage.imageHint}
-              />
-            </div>
-          )}
-        </div>
-        <div className="md:col-span-3">
+      <div className="max-w-4xl mx-auto">
           <KenteGuideClient />
-        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import { kentePatternInsights, KentePatternInsightsOutput } from "@/ai/flows/kente-pattern-insights";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const formSchema = z.object({
   patternName: z.string().min(2, {
@@ -22,6 +24,9 @@ export function KenteGuideClient() {
   const [insights, setInsights] = useState<KentePatternInsightsOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const guideImage = PlaceHolderImages.find(img => img.id === 'kente-guide-image');
+  const insightsImage = PlaceHolderImages.find(img => img.id === 'kente-insights-image');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,32 +52,51 @@ export function KenteGuideClient() {
 
   return (
     <Card className="bg-card/60 backdrop-blur-sm border-white/20">
-      <CardHeader>
-        <CardTitle className="font-headline">Search for a Pattern</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mb-8">
-            <FormField
-              control={form.control}
-              name="patternName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Pattern Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Adwinasa, Sika Futoro" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Get Insights
-            </Button>
-          </form>
-        </Form>
-
+      <div className="grid md:grid-cols-5">
+        <div className="md:col-span-2">
+            {guideImage && (
+                <div className="relative h-full w-full min-h-[200px] md:min-h-0 rounded-t-lg md:rounded-l-lg md:rounded-r-none overflow-hidden">
+                <Image
+                    src={guideImage.imageUrl}
+                    alt={guideImage.description}
+                    fill
+                    className="object-cover"
+                    data-ai-hint={guideImage.imageHint}
+                />
+                </div>
+            )}
+        </div>
+        <div className="md:col-span-3">
+          <CardHeader>
+            <CardTitle className="font-headline">Search for a Pattern</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="patternName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pattern Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Adwinasa, Sika Futoro" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Get Insights
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </div>
+      </div>
+      
+      <div className="p-6 pt-0">
         {isLoading && (
           <div className="flex items-center justify-center p-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -80,13 +104,24 @@ export function KenteGuideClient() {
         )}
 
         {error && (
-            <div className="text-destructive p-4 border border-destructive/50 rounded-md bg-destructive/20 backdrop-blur-sm">
+            <div className="text-destructive p-4 border border-destructive/50 rounded-md bg-destructive/20 backdrop-blur-sm mt-8">
                 {error}
             </div>
         )}
 
         {insights && (
-          <div className="space-y-6 animate-in fade-in-50 duration-500">
+          <div className="space-y-6 animate-in fade-in-50 duration-500 mt-8">
+            {insightsImage && (
+                <div className="relative aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-lg">
+                    <Image
+                        src={insightsImage.imageUrl}
+                        alt={insightsImage.description}
+                        fill
+                        className="object-cover"
+                        data-ai-hint={insightsImage.imageHint}
+                    />
+                </div>
+            )}
             <div>
               <h3 className="font-headline text-2xl font-bold mb-2">Cultural Significance</h3>
               <p className="text-muted-foreground whitespace-pre-wrap">{insights.culturalSignificance}</p>
@@ -97,7 +132,7 @@ export function KenteGuideClient() {
             </div>
           </div>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 }
