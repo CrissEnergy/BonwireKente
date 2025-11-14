@@ -1,7 +1,7 @@
 
 'use client';
 
-import { notFound, useParams } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Separator } from '@/components/ui/separator';
@@ -15,9 +15,8 @@ import { doc, collection } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 
-export default function ProductPage() {
-  const params = useParams();
-  const slug = params.slug as string;
+export default function ProductPage({ params }: { params: { slug: string } }) {
+  const slug = params.slug;
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
   const firestore = useFirestore();
 
