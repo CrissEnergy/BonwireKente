@@ -11,13 +11,13 @@ import { ProductPrice } from '@/components/products/ProductPrice';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
-import { doc, collection } from 'firebase/firestore';
+import { doc, collection, query, where, limit } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 
 export default function ProductPage() {
   const params = useParams();
-  const slug = params.slug as string;
+  const slug = params?.slug as string;
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
   const firestore = useFirestore();
 
@@ -28,15 +28,22 @@ export default function ProductPage() {
 
   const { data: product, isLoading: isProductLoading } = useDoc<Product>(productRef);
 
-  const productsQuery = useMemoFirebase(() => {
-      if (!firestore) return null;
-      return collection(firestore, 'products');
-  }, [firestore]);
-  const { data: allProducts, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
+  const relatedProductsQuery = useMemoFirebase(() => {
+    if (!firestore || !product) return null;
+    // Query for 4 other products in the same category, excluding the current one.
+    return query(
+      collection(firestore, 'products'),
+      where('category', '==', product.category),
+      where('id', '!=', product.id),
+      limit(4)
+    );
+  }, [firestore, product]);
 
-  const isLoading = isProductLoading || areProductsLoading;
+  const { data: relatedProducts, isLoading: areProductsLoading } = useCollection<Product>(relatedProductsQuery);
 
-  if (isLoading) {
+  const isLoading = isProductLoading || (product && areProductsLoading);
+
+  if (isProductLoading && !product) {
     return (
       <div className="relative min-h-[calc(100vh-4rem)] w-full flex items-center justify-center">
         {heroImage && (
@@ -59,10 +66,6 @@ export default function ProductPage() {
   if (!product) {
     notFound();
   }
-
-  const relatedProducts = allProducts 
-    ? allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4)
-    : [];
 
   return (
     <div className="relative min-h-screen w-full animate-fade-in-up">
@@ -126,7 +129,7 @@ export default function ProductPage() {
                 </Card>
             </div>
 
-            {relatedProducts.length > 0 && (
+            {relatedProducts && relatedProducts.length > 0 && (
                 <section className="mt-16 md:mt-24">
                 <h2 className="text-3xl font-bold text-center font-headline mb-8 text-white">Related Products</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
