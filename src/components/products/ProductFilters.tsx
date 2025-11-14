@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,7 +42,7 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
     };
 
     return (
-        <Card className="sticky top-20 bg-card/60 backdrop-blur-sm border-white/20">
+        <Card className="sticky top-20 bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Filters</CardTitle>
             </CardHeader>

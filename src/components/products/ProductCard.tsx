@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -43,7 +44,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const productInWishlist = isInWishlist(product.id);
 
   return (
-    <Card className="overflow-hidden flex flex-col group bg-card/60 backdrop-blur-sm border-white/20">
+    <Card className="overflow-hidden flex flex-col group bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
       <Link href={`/shop/${slug}`} className="block">
         <CardContent className="p-0">
           <div className="aspect-w-3 aspect-h-4 relative">
