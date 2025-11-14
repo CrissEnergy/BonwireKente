@@ -1,3 +1,4 @@
+
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -24,6 +25,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Card } from '@/components/ui/card';
+import { ProductPrice } from '@/components/products/ProductPrice';
 
 
 export default function AdminProductsPage() {
@@ -92,7 +94,9 @@ export default function AdminProductsPage() {
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>{product.category}</TableCell>
-                  <TableCell className="hidden md:table-cell">{formatPrice(product.price)}</TableCell>
+                  <TableCell className="hidden md:table-cell">
+                      <ProductPrice price={product.price} />
+                  </TableCell>
                   <TableCell>
                     <AlertDialog>
                       <DropdownMenu>

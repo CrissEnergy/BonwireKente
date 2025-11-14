@@ -10,6 +10,7 @@ import type { Product } from '@/lib/types';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { ProductPrice } from './ProductPrice';
 
 interface ProductCardProps {
   product: Product;
@@ -40,7 +41,6 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const productInWishlist = isInWishlist(product.id);
 
-  // The slug is now the product ID
   const slug = product.id;
 
   return (
@@ -76,7 +76,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <h3 className="font-semibold text-lg truncate">{product.name}</h3>
           <p className="text-sm text-muted-foreground">{product.patternName}</p>
         </Link>
-        <p className="text-lg font-bold mt-2 flex-grow">{formatPrice(product.price)}</p>
+        <ProductPrice price={product.price} className="text-lg font-bold mt-2 flex-grow" />
       </div>
       <CardFooter className="p-4 pt-0">
         <Button className="w-full" onClick={handleAddToCart}>

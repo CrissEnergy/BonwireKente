@@ -1,7 +1,7 @@
 
 "use client";
 
-import type { Product, Currency } from '@/lib/types';
+import type { Product, Currency, ProductPrice } from '@/lib/types';
 import { CURRENCIES } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react';
 
@@ -14,7 +14,7 @@ interface AppContextType {
   wishlist: Product[];
   currency: Currency;
   setCurrency: (currency: Currency) => void;
-  formatPrice: (price: number) => string;
+  formatPrice: (price: ProductPrice) => string;
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;
@@ -49,7 +49,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         console.error("Could not set currency based on location:", error);
-        // Default to USD if the fetch fails
         setCurrency('USD');
       }
     };
@@ -57,10 +56,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     fetchLocationAndSetCurrency();
   }, []);
 
-  const formatPrice = (price: number) => {
-    const { symbol, rate } = CURRENCIES[currency];
-    const convertedPrice = price * rate;
-    return `${symbol}${convertedPrice.toFixed(2)}`;
+  const formatPrice = (price: ProductPrice) => {
+    const { symbol } = CURRENCIES[currency];
+    const priceInCurrency = price[currency.toLowerCase() as keyof ProductPrice];
+    return `${symbol}${priceInCurrency.toFixed(2)}`;
   };
   
   const addToCart = (product: Product, quantity = 1) => {

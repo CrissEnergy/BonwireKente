@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -18,18 +19,20 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import type { Order } from '@/lib/types';
+import { CURRENCIES } from '@/lib/types';
 
 
 export function CheckoutClient() {
-  const { cart, formatPrice, clearCart } = useAppContext();
+  const { cart, formatPrice, clearCart, currency } = useAppContext();
   const { user } = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.price[currency.toLowerCase() as keyof typeof item.price] * item.quantity, 0);
   const total = subtotal; // Shipping is free for now
+  const currencySymbol = CURRENCIES[currency].symbol;
 
   const handlePlaceOrder = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -48,14 +51,13 @@ export function CheckoutClient() {
             id: item.id,
             name: item.name,
             quantity: item.quantity,
-            price: item.price,
+            price: item.price[currency.toLowerCase() as keyof typeof item.price],
             imageUrl: item.imageUrl,
         }))
     };
 
     try {
         const ordersCollectionRef = collection(firestore, `users/${user.uid}/orders`);
-        // We're not awaiting this, but we can still use .then() and .catch()
         addDocumentNonBlocking(ordersCollectionRef, orderData)
             .then(() => {
                 toast({
@@ -63,7 +65,7 @@ export function CheckoutClient() {
                     description: "Thank you for your purchase. Your heritage is on its way!",
                 });
                 clearCart();
-                router.push('/account'); // Redirect to account page to see order history
+                router.push('/account');
             })
             .catch(err => {
                 console.error("Error placing order:", err);
@@ -183,13 +185,13 @@ export function CheckoutClient() {
                         <p className="text-sm text-slate-300">Qty: {item.quantity}</p>
                     </div>
                     </div>
-                    <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
+                    <p className="font-medium">{currencySymbol}{(item.price[currency.toLowerCase() as keyof typeof item.price] * item.quantity).toFixed(2)}</p>
                 </div>
                 ))}
                 <Separator className="bg-white/20" />
                 <div className="flex justify-between">
                 <span className="text-slate-300">Subtotal</span>
-                <span className="font-medium">{formatPrice(subtotal)}</span>
+                <span className="font-medium">{currencySymbol}{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                 <span className="text-slate-300">Shipping</span>
@@ -198,7 +200,7 @@ export function CheckoutClient() {
                 <Separator className="bg-white/20" />
                 <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span>{formatPrice(total)}</span>
+                <span>{currencySymbol}{total.toFixed(2)}</span>
                 </div>
             </CardContent>
             </Card>

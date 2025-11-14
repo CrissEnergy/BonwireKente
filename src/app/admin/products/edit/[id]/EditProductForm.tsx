@@ -24,11 +24,14 @@ import Image from 'next/image';
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'] as const;
 const availableTags = ['Unisex', 'For Men', 'For Women', 'Wedding', 'Festival', 'Everyday', 'Traditional', 'Naming Ceremony'] as const;
 
-// Schema for editing does not include images, as we won't handle re-uploads in this form.
 const productSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters.'),
   patternName: z.string().min(3, 'Pattern name must be at least 3 characters.'),
-  price: z.coerce.number().positive('Price must be a positive number.'),
+  price: z.object({
+    usd: z.coerce.number().positive('USD price must be a positive number.'),
+    ghs: z.coerce.number().positive('GHS price must be a positive number.'),
+    eur: z.coerce.number().positive('EUR price must be a positive number.'),
+  }),
   description: z.string().min(10, 'Description must be at least 10 characters.'),
   story: z.string().min(10, 'Story must be at least 10 characters.'),
   category: z.enum(availableCategories, { required_error: 'Please select a category.' }),
@@ -69,7 +72,6 @@ export function EditProductForm({ product }: EditProductFormProps) {
         if (!firestore) throw new Error("Firestore not available");
         const productDocRef = doc(firestore, 'products', product.id);
 
-        // We only update the non-image fields.
         const productDataToUpdate = {
           ...values,
         };
@@ -145,44 +147,74 @@ export function EditProductForm({ product }: EditProductFormProps) {
                 )}
               />
             </div>
-
-            <div className="grid md:grid-cols-2 gap-8">
+            
+            <div>
+              <FormLabel>Prices</FormLabel>
+              <div className="grid md:grid-cols-3 gap-8 mt-2">
                 <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Price (USD)</FormLabel>
-                    <FormControl>
-                        <Input type="number" placeholder="e.g., 75.00" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
+                  control={form.control}
+                  name="price.usd"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Price (USD)</FormLabel>
+                      <FormControl>
+                          <Input type="number" placeholder="e.g., 75.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                      </FormItem>
+                  )}
                 />
                 <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a product category" />
-                            </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                            {availableCategories.map(cat => (
-                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                            ))}
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                    </FormItem>
-                )}
+                  control={form.control}
+                  name="price.ghs"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Price (GHS)</FormLabel>
+                      <FormControl>
+                          <Input type="number" placeholder="e.g., 1110.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                      </FormItem>
+                  )}
                 />
+                <FormField
+                  control={form.control}
+                  name="price.eur"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Price (EUR)</FormLabel>
+                      <FormControl>
+                          <Input type="number" placeholder="e.g., 69.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                      </FormItem>
+                  )}
+                />
+              </div>
             </div>
+
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                  <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                          <SelectTrigger>
+                              <SelectValue placeholder="Select a product category" />
+                          </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                          {availableCategories.map(cat => (
+                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                          </SelectContent>
+                      </Select>
+                      <FormMessage />
+                  </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

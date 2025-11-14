@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -9,13 +10,15 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Separator } from '@/components/ui/separator';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import { ProductPrice } from '@/components/products/ProductPrice';
 
 export function CartClient() {
-  const { cart, removeFromCart, updateCartQuantity, formatPrice } = useAppContext();
+  const { cart, removeFromCart, updateCartQuantity, formatPrice, currency } = useAppContext();
   
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.price[currency.toLowerCase() as keyof typeof item.price] * item.quantity, 0);
   const shipping = 0; // Placeholder
   const total = subtotal + shipping;
+  const totalFormatted = `${CURRENCIES[currency].symbol}${total.toFixed(2)}`;
 
   if (cart.length === 0) {
     return (
@@ -38,25 +41,23 @@ export function CartClient() {
     <div className="grid lg:grid-cols-3 gap-12 items-start text-white">
       <div className="lg:col-span-2 space-y-6">
         {cart.map(item => {
-          const image = PlaceHolderImages.find(img => img.id === item.images[0]);
           const slug = item.patternName.toLowerCase().replace(/ /g, '-');
           return (
             <Card key={item.id} className="flex items-center p-4 bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
               <div className="relative h-24 w-24 rounded-lg overflow-hidden mr-4">
-                {image && (
+                {item.imageUrl && (
                   <Image
-                    src={image.imageUrl}
+                    src={item.imageUrl}
                     alt={item.name}
                     fill
                     className="object-cover"
-                    data-ai-hint={image.imageHint}
                   />
                 )}
               </div>
               <div className="flex-grow">
                 <Link href={`/shop/${slug}`} className="font-semibold hover:text-primary">{item.name}</Link>
                 <p className="text-sm text-slate-300">{item.patternName}</p>
-                <p className="text-lg font-bold mt-1">{formatPrice(item.price)}</p>
+                <ProductPrice price={item.price} className="text-lg font-bold mt-1" />
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center border border-white/20 rounded-md">
@@ -84,7 +85,7 @@ export function CartClient() {
           <CardContent className="space-y-4">
             <div className="flex justify-between">
               <span className="text-slate-300">Subtotal</span>
-              <span>{formatPrice(subtotal)}</span>
+              <span>{`${CURRENCIES[currency].symbol}${subtotal.toFixed(2)}`}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-300">Shipping</span>
@@ -93,7 +94,7 @@ export function CartClient() {
             <Separator className="bg-white/20"/>
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
-              <span>{formatPrice(total)}</span>
+              <span>{totalFormatted}</span>
             </div>
           </CardContent>
           <CardFooter>

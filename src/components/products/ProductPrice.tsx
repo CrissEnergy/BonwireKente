@@ -1,10 +1,12 @@
+
 "use client";
 
 import { useAppContext } from "@/context/AppContext";
+import type { ProductPrice as ProductPriceType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface ProductPriceProps {
-    price: number;
+    price: ProductPriceType;
     className?: string;
 }
 

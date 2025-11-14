@@ -20,8 +20,14 @@
           "description": "Detailed description of the product."
         },
         "price": {
-          "type": "number",
-          "description": "Price of the product."
+          "type": "object",
+          "description": "Prices of the product in different currencies.",
+          "properties": {
+            "usd": { "type": "number" },
+            "ghs": { "type": "number" },
+            "eur": { "type": "number" }
+          },
+          "required": ["usd", "ghs", "eur"]
         },
         "imageUrl": {
           "type": "string",

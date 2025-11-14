@@ -10,6 +10,7 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
+import { useAppContext } from '@/context/AppContext';
 
 export default function ShopPage() {
   const [filters, setFilters] = useState({
@@ -20,6 +21,7 @@ export default function ShopPage() {
     tags: [] as string[],
   });
 
+  const { currency } = useAppContext();
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
   const firestore = useFirestore();
 
@@ -32,14 +34,17 @@ export default function ShopPage() {
 
   const filteredProducts = useMemo(() => {
     if (!allProducts) return [];
+    const currencyKey = currency.toLowerCase() as 'usd' | 'ghs' | 'eur';
+    
     return allProducts.filter(product => {
-      const inPrice = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
+      const price = product.price[currencyKey];
+      const inPrice = price >= filters.priceRange[0] && price <= filters.priceRange[1];
       const inOccasion = filters.occasions.length === 0 || (product.tags && product.tags.some(t => filters.occasions.includes(t)));
       const inCategory = filters.categories.length === 0 || filters.categories.includes(product.category);
       const inAudience = filters.audience.length === 0 || (product.tags && product.tags.some(t => filters.audience.includes(t)));
       return inPrice && inOccasion && inCategory && inAudience;
     });
-  }, [filters, allProducts]);
+  }, [filters, allProducts, currency]);
 
   return (
     <div className="relative min-h-screen w-full animate-fade-in-up">

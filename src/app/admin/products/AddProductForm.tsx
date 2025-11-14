@@ -23,14 +23,16 @@ import Image from 'next/image';
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'] as const;
 const availableTags = ['Unisex', 'For Men', 'For Women', 'Wedding', 'Festival', 'Everyday', 'Traditional', 'Naming Ceremony'] as const;
 
-// Define a schema for a single file, ensuring it is a File object
 const fileSchema = z.custom<File>(val => val instanceof File, 'Please upload a file.');
-
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters.'),
   patternName: z.string().min(3, 'Pattern name must be at least 3 characters.'),
-  price: z.coerce.number().positive('Price must be a positive number.'),
+  price: z.object({
+    usd: z.coerce.number().positive('USD price must be a positive number.'),
+    ghs: z.coerce.number().positive('GHS price must be a positive number.'),
+    eur: z.coerce.number().positive('EUR price must be a positive number.'),
+  }),
   description: z.string().min(10, 'Description must be at least 10 characters.'),
   story: z.string().min(10, 'Story must be at least 10 characters.'),
   category: z.enum(availableCategories, { required_error: 'Please select a category.' }),
@@ -54,7 +56,11 @@ export function AddProductForm() {
     defaultValues: {
       name: '',
       patternName: '',
-      price: 0,
+      price: {
+        usd: 0,
+        ghs: 0,
+        eur: 0,
+      },
       description: '',
       story: '',
       tags: [],
@@ -74,7 +80,6 @@ export function AddProductForm() {
       setImagePreviews([]);
     }
 
-    // Cleanup function to revoke the object URLs
     return () => {
       newImagePreviews.forEach(url => URL.revokeObjectURL(url));
     };
@@ -88,11 +93,9 @@ export function AddProductForm() {
             throw new Error("Firebase services not available.");
         }
         
-        // Generate a new document reference with a unique ID *before* uploading.
         const newDocRef = doc(collection(firestore, 'products'));
         const newProductId = newDocRef.id;
 
-        // Upload images to a folder named after the new product ID.
         const imageUrls = await Promise.all(
             values.images.map(async (imageFile) => {
                 const imageRef = ref(storage, `products/${newProductId}/${imageFile.name}`);
@@ -103,12 +106,11 @@ export function AddProductForm() {
         
         const productData = {
           ...values,
-          id: newProductId, // Use the generated ID
+          id: newProductId,
           images: imageUrls,
-          imageUrl: imageUrls[0] || '' // Set the primary image URL
+          imageUrl: imageUrls[0] || ''
         };
         
-        // Save the document with the new ID and all image URLs.
         await setDoc(newDocRef, productData);
         
         toast({
@@ -119,7 +121,7 @@ export function AddProductForm() {
         form.reset();
         setImagePreviews([]);
         router.push('/admin/products');
-        router.refresh(); // Important to ensure the new product shows up
+        router.refresh();
 
     } catch (error) {
         console.error("Error adding product: ", error);
@@ -170,43 +172,73 @@ export function AddProductForm() {
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <FormLabel>Prices</FormLabel>
+              <div className="grid md:grid-cols-3 gap-8 mt-2">
                 <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Price (USD)</FormLabel>
-                    <FormControl>
-                        <Input type="number" placeholder="e.g., 75.00" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
+                  control={form.control}
+                  name="price.usd"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Price (USD)</FormLabel>
+                      <FormControl>
+                          <Input type="number" placeholder="e.g., 75.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                      </FormItem>
+                  )}
                 />
                 <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a product category" />
-                            </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                            {availableCategories.map(cat => (
-                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                            ))}
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                    </FormItem>
-                )}
+                  control={form.control}
+                  name="price.ghs"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Price (GHS)</FormLabel>
+                      <FormControl>
+                          <Input type="number" placeholder="e.g., 1110.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                      </FormItem>
+                  )}
                 />
+                <FormField
+                  control={form.control}
+                  name="price.eur"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Price (EUR)</FormLabel>
+                      <FormControl>
+                          <Input type="number" placeholder="e.g., 69.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                      </FormItem>
+                  )}
+                />
+              </div>
             </div>
+
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                  <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                          <SelectTrigger>
+                              <SelectValue placeholder="Select a product category" />
+                          </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                          {availableCategories.map(cat => (
+                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                          </SelectContent>
+                      </Select>
+                      <FormMessage />
+                  </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
