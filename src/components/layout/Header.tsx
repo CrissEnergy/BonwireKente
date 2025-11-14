@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Currency, CURRENCIES } from '@/lib/types';
 import { Fragment } from 'react';
 import { LiveSearch } from './LiveSearch';
+import { ThemeToggle } from './ThemeToggle';
 
 export function Header() {
   const { cartItemCount, currency, setCurrency } = useAppContext();
@@ -80,6 +81,7 @@ export function Header() {
 
 
         <div className="flex flex-1 items-center justify-end space-x-2">
+          <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="flex items-center gap-1">
