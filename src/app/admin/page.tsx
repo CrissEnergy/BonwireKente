@@ -6,6 +6,7 @@ import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, collectionGroup } from "firebase/firestore";
 import type { Order, Product } from "@/lib/types";
 import { useAppContext } from "@/context/AppContext";
+import { CURRENCIES } from "@/lib/types";
 
 export default function AdminDashboardPage() {
   const firestore = useFirestore();
@@ -19,16 +20,21 @@ export default function AdminDashboardPage() {
 
   const isLoading = isLoadingProducts || isLoadingOrders;
 
-  const totalRevenue = orders ? orders.reduce((sum, order) => sum + order.totalAmount, 0) : 0;
+  // Calculate revenue based on the selected currency
+  const totalRevenue = orders
+    ? orders
+        .filter(order => order.currency === currency)
+        .reduce((sum, order) => sum + order.totalAmount, 0)
+    : 0;
+
   const totalOrders = orders ? orders.length : 0;
   const totalProducts = products ? products.length : 0;
   
-  // Note: formatPrice expects a price object. For this aggregate view, we format manually.
-  // We will assume USD for the dashboard summary display.
-  const formattedTotalRevenue = `$${totalRevenue.toFixed(2)}`;
+  const currencySymbol = CURRENCIES[currency].symbol;
+  const formattedTotalRevenue = `${currencySymbol}${totalRevenue.toFixed(2)}`;
 
   const stats = [
-    { title: "Total Revenue", value: formattedTotalRevenue, icon: DollarSign, description: "All-time sales (in USD)" },
+    { title: "Total Revenue", value: formattedTotalRevenue, icon: DollarSign, description: `All-time sales in ${currency}` },
     { title: "Total Orders", value: totalOrders, icon: ShoppingCart, description: "All-time orders" },
     { title: "Total Products", value: totalProducts, icon: Package, description: "Products available" },
   ];

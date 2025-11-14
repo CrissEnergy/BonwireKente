@@ -42,6 +42,7 @@ export interface Order {
     userId: string;
     orderDate: string; // Should be ISO string
     totalAmount: number;
+    currency: Currency; // Added currency to the order
     shippingAddress: string; 
     paymentMethod: string;
     status: OrderStatus;

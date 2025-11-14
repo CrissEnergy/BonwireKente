@@ -44,6 +44,7 @@ export function CheckoutClient() {
         userId: user.uid,
         orderDate: new Date().toISOString(),
         totalAmount: total,
+        currency: currency, // Save the currency with the order
         shippingAddress: "123 Heritage Lane, Accra, Ghana", // Placeholder
         paymentMethod: "Stripe", // Placeholder
         status: 'Pending',
