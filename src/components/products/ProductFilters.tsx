@@ -8,29 +8,31 @@ import { Separator } from '@/components/ui/separator';
 
 const availableColors = ['Gold', 'Red', 'Black', 'Green', 'Blue', 'White', 'Orange'];
 const availableOccasions = ['Traditional', 'Wedding', 'Festival', 'Naming Ceremony', 'Everyday'];
+const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'];
+const availableAudience = ['Unisex', 'For Men', 'For Women'];
+
+type Filters = {
+    colors: string[];
+    priceRange: [number, number];
+    occasions: string[];
+    categories: string[];
+    audience: string[];
+};
 
 interface ProductFiltersProps {
-    filters: { colors: string[]; priceRange: [number, number]; occasions: string[] };
-    setFilters: React.Dispatch<React.SetStateAction<{ colors: string[]; priceRange: [number, number]; occasions: string[] }>>;
+    filters: Filters;
+    setFilters: React.Dispatch<React.SetStateAction<Filters>>;
 }
 
 export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
 
-    const handleColorChange = (color: string) => {
+    const handleCheckboxChange = (filterType: keyof Filters, value: string) => {
         setFilters(prev => {
-            const newColors = prev.colors.includes(color)
-                ? prev.colors.filter(c => c !== color)
-                : [...prev.colors, color];
-            return { ...prev, colors: newColors };
-        });
-    };
-
-    const handleOccasionChange = (occasion: string) => {
-        setFilters(prev => {
-            const newOccasions = prev.occasions.includes(occasion)
-                ? prev.occasions.filter(o => o !== occasion)
-                : [...prev.occasions, occasion];
-            return { ...prev, occasions: newOccasions };
+            const currentValues = prev[filterType] as string[];
+            const newValues = currentValues.includes(value)
+                ? currentValues.filter(v => v !== value)
+                : [...currentValues, value];
+            return { ...prev, [filterType]: newValues };
         });
     };
 
@@ -61,6 +63,42 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
                 <Separator />
                 
                 <div>
+                    <h4 className="font-semibold mb-4">Category</h4>
+                    <div className="space-y-2">
+                        {availableCategories.map(category => (
+                            <div key={category} className="flex items-center space-x-2">
+                                <Checkbox
+                                    id={`category-${category}`}
+                                    checked={filters.categories.includes(category)}
+                                    onCheckedChange={() => handleCheckboxChange('categories', category)}
+                                />
+                                <Label htmlFor={`category-${category}`}>{category}</Label>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                    <h4 className="font-semibold mb-4">Audience</h4>
+                    <div className="space-y-2">
+                        {availableAudience.map(audience => (
+                            <div key={audience} className="flex items-center space-x-2">
+                                <Checkbox
+                                    id={`audience-${audience}`}
+                                    checked={filters.audience.includes(audience)}
+                                    onCheckedChange={() => handleCheckboxChange('audience', audience)}
+                                />
+                                <Label htmlFor={`audience-${audience}`}>{audience}</Label>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <Separator />
+
+                <div>
                     <h4 className="font-semibold mb-4">Occasion</h4>
                     <div className="space-y-2">
                         {availableOccasions.map(occasion => (
@@ -68,7 +106,7 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
                                 <Checkbox
                                     id={`occasion-${occasion}`}
                                     checked={filters.occasions.includes(occasion)}
-                                    onCheckedChange={() => handleOccasionChange(occasion)}
+                                    onCheckedChange={() => handleCheckboxChange('occasions', occasion)}
                                 />
                                 <Label htmlFor={`occasion-${occasion}`}>{occasion}</Label>
                             </div>
@@ -86,7 +124,7 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
                                 <Checkbox
                                     id={`color-${color}`}
                                     checked={filters.colors.includes(color)}
-                                    onCheckedChange={() => handleColorChange(color)}
+                                    onCheckedChange={() => handleCheckboxChange('colors', color)}
                                 />
                                 <Label htmlFor={`color-${color}`}>{color}</Label>
                             </div>

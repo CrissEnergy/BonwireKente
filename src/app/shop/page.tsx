@@ -10,6 +10,8 @@ export default function ShopPage() {
     colors: [] as string[],
     priceRange: [0, 500] as [number, number],
     occasions: [] as string[],
+    categories: [] as string[],
+    audience: [] as string[],
   });
 
   const filteredProducts = useMemo(() => {
@@ -17,7 +19,9 @@ export default function ShopPage() {
       const inColor = filters.colors.length === 0 || product.colors.some(c => filters.colors.includes(c));
       const inPrice = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
       const inOccasion = filters.occasions.length === 0 || product.tags.some(t => filters.occasions.includes(t));
-      return inColor && inPrice && inOccasion;
+      const inCategory = filters.categories.length === 0 || filters.categories.includes(product.category);
+      const inAudience = filters.audience.length === 0 || product.tags.some(t => filters.audience.includes(t));
+      return inColor && inPrice && inOccasion && inCategory && inAudience;
     });
   }, [filters]);
 
