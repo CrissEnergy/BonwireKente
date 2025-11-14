@@ -67,7 +67,7 @@
       "imageHint": "kente detail"
     },
     {
-      "id": "kente-insights-image",
+      "id": "kente-insights-default",
       "description": "A colorful display of Kente cloth, showing intricate patterns.",
       "imageUrl": "https://images.unsplash.com/photo-1660695828403-b42e117e0b4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxrZW50ZSUyMGNsb3RofGVufDB8fHx8MTc2MzA4OTA3M3ww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "kente display"

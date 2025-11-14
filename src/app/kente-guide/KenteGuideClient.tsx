@@ -12,7 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import { kentePatternInsights, KentePatternInsightsOutput } from "@/ai/flows/kente-pattern-insights";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { products } from "@/lib/placeholder-data";
+import { PlaceHolderImages, ImagePlaceholder } from '@/lib/placeholder-images';
 
 const formSchema = z.object({
   patternName: z.string().min(2, {
@@ -22,11 +23,11 @@ const formSchema = z.object({
 
 export function KenteGuideClient() {
   const [insights, setInsights] = useState<KentePatternInsightsOutput | null>(null);
+  const [patternImage, setPatternImage] = useState<ImagePlaceholder | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const guideImage = PlaceHolderImages.find(img => img.id === 'kente-guide-image');
-  const insightsImage = PlaceHolderImages.find(img => img.id === 'kente-insights-image');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,11 +40,23 @@ export function KenteGuideClient() {
     setIsLoading(true);
     setError(null);
     setInsights(null);
+    setPatternImage(null);
     try {
+      // Find product and its image
+      const product = products.find(p => p.patternName.toLowerCase() === values.patternName.toLowerCase());
+      if (product && product.images.length > 0) {
+        const image = PlaceHolderImages.find(img => img.id === product.images[0]);
+        if(image) setPatternImage(image);
+      } else {
+        const defaultImage = PlaceHolderImages.find(img => img.id === 'kente-insights-default');
+        if(defaultImage) setPatternImage(defaultImage);
+      }
+
       const result = await kentePatternInsights(values);
       setInsights(result);
     } catch (e) {
       setError("Could not retrieve insights. Please try another pattern name.");
+      setPatternImage(null);
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -111,14 +124,14 @@ export function KenteGuideClient() {
 
         {insights && (
           <div className="space-y-6 animate-in fade-in-50 duration-500 mt-8">
-            {insightsImage && (
+            {patternImage && (
                 <div className="relative aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-lg">
                     <Image
-                        src={insightsImage.imageUrl}
-                        alt={insightsImage.description}
+                        src={patternImage.imageUrl}
+                        alt={patternImage.description}
                         fill
                         className="object-cover"
-                        data-ai-hint={insightsImage.imageHint}
+                        data-ai-hint={patternImage.imageHint}
                     />
                 </div>
             )}
