@@ -19,12 +19,12 @@ export function CheckoutClient() {
 
   if (cart.length === 0) {
     return (
-        <div className="text-center bg-secondary/30 rounded-lg p-12 max-w-lg mx-auto backdrop-blur-sm border border-white/20">
+        <div className="text-center bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl rounded-lg p-12 max-w-lg mx-auto text-white">
             <div className="flex justify-center mb-4">
-                <ShoppingCart className="h-12 w-12 text-muted-foreground" />
+                <ShoppingCart className="h-12 w-12 text-slate-400" />
             </div>
             <h3 className="text-2xl font-semibold font-headline">Your Cart is Empty</h3>
-            <p className="text-muted-foreground mt-2 mb-6">
+            <p className="text-slate-300 mt-2 mb-6">
                 You can't check out with an empty cart. Let's find some heritage to weave into your life.
             </p>
             <Button asChild>
@@ -35,8 +35,8 @@ export function CheckoutClient() {
   }
 
   return (
-    <div className="grid lg:grid-cols-2 gap-12">
-      <Card className="bg-card/60 backdrop-blur-sm border-white/20">
+    <div className="grid lg:grid-cols-2 gap-12 text-white">
+      <Card className="bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Shipping & Payment</CardTitle>
         </CardHeader>
@@ -77,15 +77,15 @@ export function CheckoutClient() {
              <div className="space-y-4">
               <h3 className="text-lg font-semibold">Payment Method</h3>
               <RadioGroup defaultValue="stripe" className="space-y-2">
-                <div className="flex items-center space-x-2 rounded-md border p-3 bg-background/30">
+                <div className="flex items-center space-x-2 rounded-md border border-white/20 p-3 bg-white/10">
                   <RadioGroupItem value="stripe" id="stripe" />
                   <Label htmlFor="stripe">Credit Card (Stripe)</Label>
                 </div>
-                <div className="flex items-center space-x-2 rounded-md border p-3 bg-background/30">
+                <div className="flex items-center space-x-2 rounded-md border border-white/20 p-3 bg-white/10">
                   <RadioGroupItem value="paypal" id="paypal" />
                   <Label htmlFor="paypal">PayPal</Label>
                 </div>
-                <div className="flex items-center space-x-2 rounded-md border p-3 bg-background/30">
+                <div className="flex items-center space-x-2 rounded-md border border-white/20 p-3 bg-white/10">
                   <RadioGroupItem value="mobile-money" id="mobile-money" />
                   <Label htmlFor="mobile-money">Mobile Money (Ghana)</Label>
                 </div>
@@ -97,7 +97,7 @@ export function CheckoutClient() {
       </Card>
 
       <div className="space-y-6">
-        <Card className="bg-card/60 backdrop-blur-sm border-white/20">
+        <Card className="bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
           <CardHeader>
             <CardTitle className="font-headline">Order Summary</CardTitle>
           </CardHeader>
@@ -112,23 +112,23 @@ export function CheckoutClient() {
                     </div>
                     <div>
                       <p className="font-semibold">{item.name}</p>
-                      <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
+                      <p className="text-sm text-slate-300">Qty: {item.quantity}</p>
                     </div>
                   </div>
                   <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
                 </div>
               );
             })}
-            <Separator />
+            <Separator className="bg-white/20" />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
+              <span className="text-slate-300">Subtotal</span>
               <span className="font-medium">{formatPrice(subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Shipping</span>
+              <span className="text-slate-300">Shipping</span>
               <span className="font-medium text-sm">Free</span>
             </div>
-            <Separator />
+            <Separator className="bg-white/20" />
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
               <span>{formatPrice(total)}</span>
