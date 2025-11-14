@@ -15,16 +15,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useFirestore, useStorage } from '@/firebase';
+import { useFirestore } from '@/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'] as const;
 const availableTags = ['Unisex', 'For Men', 'For Women', 'Wedding', 'Festival', 'Everyday', 'Traditional', 'Naming Ceremony'] as const;
-
-const fileSchema = z.custom<File>(val => val instanceof File, 'Please upload a file.');
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters.'),
@@ -40,7 +37,7 @@ const productSchema = z.object({
   tags: z.array(z.string()).refine(value => value.some(item => item), {
     message: 'You have to select at least one tag.',
   }),
-  images: z.array(fileSchema).min(1, 'Please upload at least one image.').max(5, 'You can upload a maximum of 5 images.'),
+  imageUrls: z.string().min(10, 'Please provide at least one image URL.').transform((val) => val.split('\n').filter(url => url.trim() !== '')),
   featured: z.boolean().default(false).optional(),
 });
 
@@ -51,7 +48,6 @@ export function AddProductForm() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [featuredImageIndex, setFeaturedImageIndex] = useState(0);
   const firestore = useFirestore();
-  const storage = useStorage();
 
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
@@ -66,50 +62,34 @@ export function AddProductForm() {
       description: '',
       story: '',
       tags: [],
-      images: [],
+      imageUrls: [],
       featured: false,
     },
   });
 
-  const imageFiles = form.watch('images');
+  const imageUrls = form.watch('imageUrls');
 
   useEffect(() => {
-    if (imageFiles && imageFiles.length > 0) {
-      const newImagePreviews = imageFiles.map(file => URL.createObjectURL(file));
-      setImagePreviews(newImagePreviews);
-      setFeaturedImageIndex(0); // Reset to first image on new selection
-
-      // Cleanup function to revoke the object URLs
-      return () => {
-        newImagePreviews.forEach(url => URL.revokeObjectURL(url));
-      };
+    if (imageUrls && imageUrls.length > 0) {
+      setImagePreviews(imageUrls);
+      setFeaturedImageIndex(0);
     } else {
       setImagePreviews([]);
     }
-  }, [imageFiles]);
+  }, [imageUrls]);
 
   async function onSubmit(values: z.infer<typeof productSchema>) {
     setIsSubmitting(true);
     
     try {
-        if (!firestore || !storage) {
+        if (!firestore) {
             throw new Error("Firebase services not available.");
         }
         
         const newDocRef = doc(collection(firestore, 'products'));
         const newProductId = newDocRef.id;
 
-        const uploadPromises = values.images.map(async (imageFile) => {
-            const imageRef = ref(storage, `products/${newProductId}/${imageFile.name}`);
-            await uploadBytes(imageRef, imageFile);
-            const url = await getDownloadURL(imageRef);
-            return { name: imageFile.name, url };
-        });
-        
-        const uploadedImages = await Promise.all(uploadPromises);
-
-        const featuredImageFile = values.images[featuredImageIndex];
-        const featuredImage = uploadedImages.find(img => img.name === featuredImageFile.name);
+        const featuredImage = values.imageUrls[featuredImageIndex];
         
         const productData = {
           id: newProductId,
@@ -121,8 +101,8 @@ export function AddProductForm() {
           category: values.category,
           tags: values.tags,
           featured: values.featured,
-          imageUrl: featuredImage ? featuredImage.url : (uploadedImages[0]?.url || ''),
-          images: uploadedImages.map(img => img.url),
+          imageUrl: featuredImage || values.imageUrls[0] || '',
+          images: values.imageUrls,
         };
         
         await setDoc(newDocRef, productData);
@@ -284,23 +264,20 @@ export function AddProductForm() {
 
              <FormField
               control={form.control}
-              name="images"
+              name="imageUrls"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Product Images</FormLabel>
+                  <FormLabel>Product Image URLs</FormLabel>
                   <FormControl>
-                     <Input 
-                        type="file" 
-                        multiple 
-                        accept="image/*"
-                        onChange={(e) => {
-                            const files = e.target.files ? Array.from(e.target.files) : [];
-                            field.onChange(files);
-                        }}
+                     <Textarea 
+                        placeholder="Paste one image URL per line"
+                        {...field}
+                        value={Array.isArray(field.value) ? field.value.join('\n') : field.value}
+                        rows={5}
                     />
                   </FormControl>
                   <FormDescription>
-                    Upload up to 5 images. Click an image preview below to set it as the featured image.
+                    Paste image URLs, one per line. Click an image preview below to set it as the featured image.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

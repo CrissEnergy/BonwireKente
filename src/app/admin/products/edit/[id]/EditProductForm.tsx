@@ -109,7 +109,7 @@ export function EditProductForm({ product }: EditProductFormProps) {
             
             <FormItem>
               <FormLabel>Current Images</FormLabel>
-              <FormDescription>Image management (add/remove/reorder) is not available in this form to prevent accidental data loss. To change images, please re-add the product.</FormDescription>
+              <FormDescription>To change images, please go to the "Add Product" page and create a new product entry.</FormDescription>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
                   {product.images && product.images.map((imageUrl, index) => (
                       <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-white/20">
