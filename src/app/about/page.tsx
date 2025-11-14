@@ -58,17 +58,15 @@ export default function AboutPage() {
                             <CarouselContent>
                                 {carouselImages.map((image, index) => image && (
                                 <CarouselItem key={index}>
-                                    <Card className="bg-transparent border-none">
-                                        <CardContent className="relative flex aspect-video items-center justify-center p-0">
-                                             <Image
-                                                src={image.imageUrl}
-                                                alt={image.description}
-                                                fill
-                                                className="object-contain rounded-lg"
-                                                data-ai-hint={image.imageHint}
-                                            />
-                                        </CardContent>
-                                    </Card>
+                                    <div className="relative h-96 w-full">
+                                         <Image
+                                            src={image.imageUrl}
+                                            alt={image.description}
+                                            fill
+                                            className="object-cover rounded-lg"
+                                            data-ai-hint={image.imageHint}
+                                        />
+                                    </div>
                                 </CarouselItem>
                                 ))}
                             </CarouselContent>
