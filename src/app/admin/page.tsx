@@ -1,14 +1,15 @@
+
 'use client';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DollarSign, Package, ShoppingCart, Loader2 } from "lucide-react";
-import { useAppContext } from "@/context/AppContext";
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, collectionGroup } from "firebase/firestore";
 import type { Order, Product } from "@/lib/types";
+import { useAppContext } from "@/context/AppContext";
 
 export default function AdminDashboardPage() {
-  const { formatPrice } = useAppContext();
   const firestore = useFirestore();
+  const { currency } = useAppContext();
 
   const productsQuery = useMemoFirebase(() => collection(firestore, 'products'), [firestore]);
   const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
@@ -21,9 +22,13 @@ export default function AdminDashboardPage() {
   const totalRevenue = orders ? orders.reduce((sum, order) => sum + order.totalAmount, 0) : 0;
   const totalOrders = orders ? orders.length : 0;
   const totalProducts = products ? products.length : 0;
+  
+  // Note: formatPrice expects a price object. For this aggregate view, we format manually.
+  // We will assume USD for the dashboard summary display.
+  const formattedTotalRevenue = `$${totalRevenue.toFixed(2)}`;
 
   const stats = [
-    { title: "Total Revenue", value: formatPrice(totalRevenue), icon: DollarSign, description: "All-time sales" },
+    { title: "Total Revenue", value: formattedTotalRevenue, icon: DollarSign, description: "All-time sales (in USD)" },
     { title: "Total Orders", value: totalOrders, icon: ShoppingCart, description: "All-time orders" },
     { title: "Total Products", value: totalProducts, icon: Package, description: "Products available" },
   ];
