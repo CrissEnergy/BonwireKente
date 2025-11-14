@@ -16,16 +16,15 @@ import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirestore, useStorage } from '@/firebase';
-import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { collection } from 'firebase/firestore';
+import { addDoc, collection, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'] as const;
 const availableTags = ['Unisex', 'For Men', 'For Women', 'Wedding', 'Festival', 'Everyday', 'Traditional', 'Naming Ceremony'] as const;
 
-// Define a schema for a single file
-const fileSchema = z.custom<File>(val => val instanceof File, 'Please upload a file.');
+// Define a schema for a single file, ensuring it is a File object
+const fileSchema = z.instanceof(File, { message: 'Please upload a file.' });
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters.'),
@@ -37,7 +36,7 @@ const productSchema = z.object({
   tags: z.array(z.string()).refine(value => value.some(item => item), {
     message: 'You have to select at least one tag.',
   }),
-  images: z.array(fileSchema).min(1, 'Please upload at least one image.'),
+  images: z.array(fileSchema).min(1, 'Please upload at least one image.').max(5, 'You can upload a maximum of 5 images.'),
   featured: z.boolean().default(false).optional(),
 });
 
@@ -69,10 +68,9 @@ export function AddProductForm() {
         if (!firestore || !storage) {
             throw new Error("Firebase services not available.");
         }
-        const productCollectionRef = collection(firestore, 'products');
         
         // Firestore creates the ID, so we can use it for the storage path
-        const newDocRef = doc(productCollectionRef);
+        const newDocRef = doc(collection(firestore, 'products'));
         const newProductId = newDocRef.id;
 
         const imageUrls = await Promise.all(
@@ -87,17 +85,20 @@ export function AddProductForm() {
           ...values,
           id: newProductId,
           images: imageUrls,
-          imageUrl: imageUrls[0] || ''
+          imageUrl: imageUrls[0] || '' // Set the first image as the main one
         };
         
-        await addDocumentNonBlocking(productCollectionRef, productData);
+        // Use setDoc with the generated ID
+        await setDocumentNonBlocking(newDocRef, productData, {});
         
         toast({
             title: 'Product Added!',
             description: `${values.name} has been added to your store.`,
         });
         
+        form.reset();
         router.push('/admin/products');
+        router.refresh();
 
     } catch (error) {
         console.error("Error adding product: ", error);

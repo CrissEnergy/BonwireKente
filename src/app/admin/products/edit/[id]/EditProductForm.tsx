@@ -15,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useFirestore, useStorage } from '@/firebase';
+import { useFirestore } from '@/firebase';
 import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { doc } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
@@ -24,6 +24,7 @@ import Image from 'next/image';
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'] as const;
 const availableTags = ['Unisex', 'For Men', 'For Women', 'Wedding', 'Festival', 'Everyday', 'Traditional', 'Naming Ceremony'] as const;
 
+// Schema for editing does not include images, as we won't handle re-uploads in this form.
 const productSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters.'),
   patternName: z.string().min(3, 'Pattern name must be at least 3 characters.'),
@@ -68,14 +69,12 @@ export function EditProductForm({ product }: EditProductFormProps) {
         if (!firestore) throw new Error("Firestore not available");
         const productDocRef = doc(firestore, 'products', product.id);
 
-        // Note: Image editing is not handled in this form.
-        // That would require a more complex implementation for uploading new files,
-        // deleting old ones, and re-ordering.
-        const productData = {
+        // We only update the non-image fields.
+        const productDataToUpdate = {
           ...values,
         };
         
-        await updateDocumentNonBlocking(productDocRef, productData);
+        await updateDocumentNonBlocking(productDocRef, productDataToUpdate);
         
         toast({
             title: 'Product Updated!',
@@ -83,6 +82,7 @@ export function EditProductForm({ product }: EditProductFormProps) {
         });
         
         router.push('/admin/products');
+        router.refresh();
 
     } catch (error) {
         console.error("Error updating product: ", error);
@@ -107,10 +107,10 @@ export function EditProductForm({ product }: EditProductFormProps) {
             
             <FormItem>
               <FormLabel>Current Images</FormLabel>
-              <FormDescription>Image management (add/remove/reorder) is not available in this form. To change images, please re-add the product.</FormDescription>
-              <div className="grid grid-cols-4 gap-4 pt-2">
-                  {product.images.map((imageUrl, index) => (
-                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
+              <FormDescription>Image management (add/remove/reorder) is not available in this form to prevent accidental data loss. To change images, please re-add the product.</FormDescription>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                  {product.images && product.images.map((imageUrl, index) => (
+                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-white/20">
                           <Image src={imageUrl} alt={`Product image ${index + 1}`} fill className="object-cover" />
                       </div>
                   ))}
