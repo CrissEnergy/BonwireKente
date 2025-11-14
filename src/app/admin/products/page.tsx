@@ -2,16 +2,47 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { products } from "@/lib/placeholder-data";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useAppContext } from "@/context/AppContext";
-import { MoreHorizontal, PlusCircle } from 'lucide-react';
+import { MoreHorizontal, PlusCircle, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, deleteDoc, doc } from 'firebase/firestore';
+import type { Product } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useToast } from '@/hooks/use-toast';
+import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { Card } from '@/components/ui/card';
+
 
 export default function AdminProductsPage() {
   const { formatPrice } = useAppContext();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+
+  const productsCollection = useMemoFirebase(() => collection(firestore, 'products'), [firestore]);
+  const { data: products, isLoading } = useCollection<Product>(productsCollection);
+
+  const handleDelete = (productId: string, productName: string) => {
+    if (!firestore) return;
+    const docRef = doc(firestore, 'products', productId);
+    deleteDocumentNonBlocking(docRef);
+    toast({
+      title: "Product Deleted",
+      description: `${productName} has been removed from your store.`,
+    });
+  };
 
   return (
     <div className="space-y-8">
@@ -26,38 +57,44 @@ export default function AdminProductsPage() {
       </div>
 
       <Card className="bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl text-white">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-white/10 border-b-white/20">
-                <TableHead className="hidden w-[100px] sm:table-cell">Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="hidden md:table-cell">Price</TableHead>
-                <TableHead>Actions</TableHead>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-white/10 border-b-white/20">
+              <TableHead className="hidden w-[100px] sm:table-cell">Image</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead className="hidden md:table-cell">Price</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center h-24">
+                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map(product => {
-                const image = PlaceHolderImages.find(img => img.id === product.images[0]);
-                return (
-                  <TableRow key={product.id} className="hover:bg-white/10 border-b-white/20">
-                    <TableCell className="hidden sm:table-cell">
-                      {image && (
-                        <div className="relative h-12 w-12 rounded-md overflow-hidden">
-                            <Image
-                            src={image.imageUrl}
-                            alt={product.name}
-                            fill
-                            className="object-cover"
-                            />
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell className="hidden md:table-cell">{formatPrice(product.price)}</TableCell>
-                    <TableCell>
+            )}
+            {!isLoading && products && products.map(product => {
+              return (
+                <TableRow key={product.id} className="hover:bg-white/10 border-b-white/20">
+                  <TableCell className="hidden sm:table-cell">
+                    {product.imageUrl && (
+                      <div className="relative h-12 w-12 rounded-md overflow-hidden">
+                          <Image
+                          src={product.imageUrl}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                          />
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{product.category}</TableCell>
+                  <TableCell className="hidden md:table-cell">{formatPrice(product.price)}</TableCell>
+                  <TableCell>
+                    <AlertDialog>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button aria-haspopup="true" size="icon" variant="ghost">
@@ -66,17 +103,42 @@ export default function AdminProductsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                          <DropdownMenuItem disabled>Edit</DropdownMenuItem>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem className="text-destructive">
+                              <Trash2 className="mr-2 h-4 w-4" /> Delete
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
                         </DropdownMenuContent>
                       </DropdownMenu>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the product "{product.name}".
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(product.id, product.name)}>
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+             {!isLoading && (!products || products.length === 0) && (
+                <TableRow>
+                    <TableCell colSpan={5} className="text-center h-24">
+                        No products found.
                     </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
+                </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </Card>
     </div>
   );

@@ -1,16 +1,24 @@
 'use client';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { orders } from "@/lib/placeholder-data";
 import { useAppContext } from "@/context/AppContext";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { collectionGroup } from "firebase/firestore";
+import type { Order } from '@/lib/types';
+import { useUser } from "@/firebase";
 
 export default function AdminOrdersPage() {
   const { formatPrice } = useAppContext();
+  const firestore = useFirestore();
+  
+  // Create a query for the "orders" collection group
+  const ordersQuery = useMemoFirebase(() => collectionGroup(firestore, 'orders'), [firestore]);
+  const { data: orders, isLoading } = useCollection<Order>(ordersQuery);
 
   return (
     <div className="space-y-8">
@@ -22,7 +30,7 @@ export default function AdminOrdersPage() {
             <TableHeader>
               <TableRow className="hover:bg-white/10 border-b-white/20">
                 <TableHead>Order ID</TableHead>
-                <TableHead>Customer</TableHead>
+                <TableHead>User ID</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Status</TableHead>
@@ -30,12 +38,19 @@ export default function AdminOrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.map(order => (
+               {isLoading && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center h-24">
+                      <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                    </TableCell>
+                  </TableRow>
+                )}
+              {!isLoading && orders && orders.map(order => (
                 <TableRow key={order.id} className="hover:bg-white/10 border-b-white/20">
                   <TableCell className="font-medium">{order.id}</TableCell>
-                  <TableCell>{order.customerName}</TableCell>
-                  <TableCell>{order.date}</TableCell>
-                  <TableCell>{formatPrice(order.total)}</TableCell>
+                  <TableCell className="text-xs">{order.userId}</TableCell>
+                  <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
+                  <TableCell>{formatPrice(order.totalAmount)}</TableCell>
                   <TableCell>
                     <Badge
                       variant="outline"
@@ -66,6 +81,13 @@ export default function AdminOrdersPage() {
                   </TableCell>
                 </TableRow>
               ))}
+               {!isLoading && (!orders || orders.length === 0) && (
+                <TableRow>
+                    <TableCell colSpan={6} className="text-center h-24">
+                        No orders found.
+                    </TableCell>
+                </TableRow>
+            )}
             </TableBody>
           </Table>
         </CardContent>

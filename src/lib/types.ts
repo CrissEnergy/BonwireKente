@@ -5,7 +5,8 @@ export interface Product {
   price: number; // Base price in USD
   description: string;
   story: string;
-  images: string[];
+  images: string[]; // These are now URLs
+  imageUrl: string; // The primary image URL
   category: 'Stoles & Sashes' | 'Full Cloths' | 'Accessories' | 'Ready-to-Wear';
   tags: ('Unisex' | 'For Men' | 'For Women' | 'Wedding' | 'Festival' | 'Everyday' | 'Traditional' | 'Naming Ceremony')[];
   colors: string[];
@@ -22,12 +23,10 @@ export type Currency = keyof typeof CURRENCIES;
 
 export interface Order {
     id: string;
-    customerName: string;
-    date: string;
-    total: number;
+    userId: string;
+    orderDate: string; // Should be ISO string
+    totalAmount: number;
+    shippingAddress: string; // This might be an object in a real app
+    paymentMethod: string;
     status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
-    items: {
-        product: Product;
-        quantity: number;
-    }[];
 }
