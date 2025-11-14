@@ -16,7 +16,7 @@ import { Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirestore, useStorage } from '@/firebase';
-import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
+import { collection, doc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Image from 'next/image';
 
@@ -74,6 +74,7 @@ export function AddProductForm() {
       setImagePreviews([]);
     }
 
+    // Cleanup function to revoke the object URLs
     return () => {
       newImagePreviews.forEach(url => URL.revokeObjectURL(url));
     };
@@ -87,9 +88,11 @@ export function AddProductForm() {
             throw new Error("Firebase services not available.");
         }
         
+        // Generate a new document reference with a unique ID *before* uploading.
         const newDocRef = doc(collection(firestore, 'products'));
         const newProductId = newDocRef.id;
 
+        // Upload images to a folder named after the new product ID.
         const imageUrls = await Promise.all(
             values.images.map(async (imageFile) => {
                 const imageRef = ref(storage, `products/${newProductId}/${imageFile.name}`);
@@ -100,11 +103,12 @@ export function AddProductForm() {
         
         const productData = {
           ...values,
-          id: newProductId,
+          id: newProductId, // Use the generated ID
           images: imageUrls,
-          imageUrl: imageUrls[0] || ''
+          imageUrl: imageUrls[0] || '' // Set the primary image URL
         };
         
+        // Save the document with the new ID and all image URLs.
         await setDoc(newDocRef, productData);
         
         toast({
@@ -115,7 +119,7 @@ export function AddProductForm() {
         form.reset();
         setImagePreviews([]);
         router.push('/admin/products');
-        router.refresh();
+        router.refresh(); // Important to ensure the new product shows up
 
     } catch (error) {
         console.error("Error adding product: ", error);
