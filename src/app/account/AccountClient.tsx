@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -38,18 +39,6 @@ export function AccountClient() {
   const { toast } = useToast();
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
-
-  useEffect(() => {
-    if (!isUserLoading && user) {
-        if (window.location.pathname.includes('/account')) {
-            toast({
-                title: "Signed In",
-                description: "Welcome back!",
-            });
-            router.push('/');
-        }
-    }
-  }, [user, isUserLoading, router, toast]);
 
   const signInForm = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -286,3 +275,5 @@ export function AccountClient() {
     </div>
   );
 }
+
+    
