@@ -43,7 +43,7 @@ export default function ContactPage() {
                 </div>
             </div>
             
-            <Card>
+            <Card className="bg-card/60 backdrop-blur-sm border-white/20">
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl">Send a Message</CardTitle>
                 </CardHeader>

@@ -46,7 +46,7 @@ export function KenteGuideClient() {
   }
 
   return (
-    <Card>
+    <Card className="bg-card/60 backdrop-blur-sm border-white/20">
       <CardHeader>
         <CardTitle className="font-headline">Search for a Pattern</CardTitle>
       </CardHeader>
@@ -80,7 +80,7 @@ export function KenteGuideClient() {
         )}
 
         {error && (
-            <div className="text-destructive p-4 border border-destructive/50 rounded-md">
+            <div className="text-destructive p-4 border border-destructive/50 rounded-md bg-destructive/20 backdrop-blur-sm">
                 {error}
             </div>
         )}

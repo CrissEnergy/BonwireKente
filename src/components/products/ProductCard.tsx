@@ -43,7 +43,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const productInWishlist = isInWishlist(product.id);
 
   return (
-    <Card className="overflow-hidden flex flex-col group">
+    <Card className="overflow-hidden flex flex-col group bg-card/60 backdrop-blur-sm border-white/20">
       <Link href={`/shop/${slug}`} className="block">
         <CardContent className="p-0">
           <div className="aspect-w-3 aspect-h-4 relative">

@@ -17,7 +17,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
 
   return (
     <div className="space-y-4 sticky top-20">
-      <Card className="overflow-hidden group">
+      <Card className="overflow-hidden group bg-card/60 backdrop-blur-sm border-white/20">
         <CardContent className="p-0">
           <div className="aspect-w-1 aspect-h-1 relative">
             {mainImage && (

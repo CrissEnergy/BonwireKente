@@ -15,7 +15,7 @@ export function AccountClient() {
           <TabsTrigger value="signup">Sign Up</TabsTrigger>
         </TabsList>
         <TabsContent value="signin">
-          <Card>
+          <Card className="bg-card/60 backdrop-blur-sm border-white/20">
             <CardHeader>
               <CardTitle className="font-headline">Sign In</CardTitle>
               <CardDescription>
@@ -36,7 +36,7 @@ export function AccountClient() {
           </Card>
         </TabsContent>
         <TabsContent value="signup">
-          <Card>
+          <Card className="bg-card/60 backdrop-blur-sm border-white/20">
             <CardHeader>
               <CardTitle className="font-headline">Create an Account</CardTitle>
               <CardDescription>

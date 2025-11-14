@@ -28,7 +28,7 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
     };
 
     return (
-        <Card className="sticky top-20">
+        <Card className="sticky top-20 bg-card/60 backdrop-blur-sm border-white/20">
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Filters</CardTitle>
             </CardHeader>

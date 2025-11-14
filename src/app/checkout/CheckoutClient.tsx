@@ -19,7 +19,7 @@ export function CheckoutClient() {
 
   if (cart.length === 0) {
     return (
-        <div className="text-center bg-secondary/30 rounded-lg p-12 max-w-lg mx-auto">
+        <div className="text-center bg-secondary/30 rounded-lg p-12 max-w-lg mx-auto backdrop-blur-sm border border-white/20">
             <div className="flex justify-center mb-4">
                 <ShoppingCart className="h-12 w-12 text-muted-foreground" />
             </div>
@@ -36,7 +36,7 @@ export function CheckoutClient() {
 
   return (
     <div className="grid lg:grid-cols-2 gap-12">
-      <Card>
+      <Card className="bg-card/60 backdrop-blur-sm border-white/20">
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Shipping & Payment</CardTitle>
         </CardHeader>
@@ -77,15 +77,15 @@ export function CheckoutClient() {
              <div className="space-y-4">
               <h3 className="text-lg font-semibold">Payment Method</h3>
               <RadioGroup defaultValue="stripe" className="space-y-2">
-                <div className="flex items-center space-x-2 rounded-md border p-3">
+                <div className="flex items-center space-x-2 rounded-md border p-3 bg-background/30">
                   <RadioGroupItem value="stripe" id="stripe" />
                   <Label htmlFor="stripe">Credit Card (Stripe)</Label>
                 </div>
-                <div className="flex items-center space-x-2 rounded-md border p-3">
+                <div className="flex items-center space-x-2 rounded-md border p-3 bg-background/30">
                   <RadioGroupItem value="paypal" id="paypal" />
                   <Label htmlFor="paypal">PayPal</Label>
                 </div>
-                <div className="flex items-center space-x-2 rounded-md border p-3">
+                <div className="flex items-center space-x-2 rounded-md border p-3 bg-background/30">
                   <RadioGroupItem value="mobile-money" id="mobile-money" />
                   <Label htmlFor="mobile-money">Mobile Money (Ghana)</Label>
                 </div>
@@ -97,7 +97,7 @@ export function CheckoutClient() {
       </Card>
 
       <div className="space-y-6">
-        <Card>
+        <Card className="bg-card/60 backdrop-blur-sm border-white/20">
           <CardHeader>
             <CardTitle className="font-headline">Order Summary</CardTitle>
           </CardHeader>

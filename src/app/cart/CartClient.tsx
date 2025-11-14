@@ -19,7 +19,7 @@ export function CartClient() {
 
   if (cart.length === 0) {
     return (
-      <div className="text-center bg-secondary/30 rounded-lg p-12 max-w-lg mx-auto">
+      <div className="text-center bg-secondary/30 rounded-lg p-12 max-w-lg mx-auto backdrop-blur-sm border border-white/20">
         <div className="flex justify-center mb-4">
           <ShoppingCart className="h-12 w-12 text-muted-foreground" />
         </div>
@@ -41,7 +41,7 @@ export function CartClient() {
           const image = PlaceHolderImages.find(img => img.id === item.images[0]);
           const slug = item.patternName.toLowerCase().replace(/ /g, '-');
           return (
-            <Card key={item.id} className="flex items-center p-4">
+            <Card key={item.id} className="flex items-center p-4 bg-card/60 backdrop-blur-sm border-white/20">
               <div className="relative h-24 w-24 rounded-md overflow-hidden mr-4">
                 {image && (
                   <Image
@@ -77,7 +77,7 @@ export function CartClient() {
         })}
       </div>
       <div className="lg:col-span-1 sticky top-20">
-        <Card>
+        <Card className="bg-card/60 backdrop-blur-sm border-white/20">
           <CardHeader>
             <CardTitle className="font-headline">Order Summary</CardTitle>
           </CardHeader>
