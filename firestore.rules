@@ -54,74 +54,83 @@ service cloud.firestore {
       allow get, update, delete: if isOwner(userId);
       allow create: if isOwner(userId);
       allow list: if false;
+
+        /**
+         * @description Restricts access to the user's cart to the authenticated user.
+         * @path /users/{userId}/cart
+         * @allow (get, create, update, delete) Authenticated user can access and modify their own cart.
+         * @deny (list) No public listing of user carts.
+         * @principle Enforces document ownership for the user's cart.
+         */
+        match /cart {
+          allow get, create, update, delete: if isSignedIn() && isOwner(userId);
+          allow list: if isOwner(userId);
+
+            /**
+             * @description Restricts access to items in the user's cart to the authenticated user.
+             * @path /users/{userId}/cart/cartItems/{cartItemId}
+             * @allow (get, create, update, delete) Authenticated user can access and modify items in their own cart.
+             * @deny (list) No public listing of cart items.
+             * @principle Enforces document ownership for items in the user's cart.
+             */
+            match /cartItems/{cartItemId} {
+              allow get, create, update, delete: if isOwner(userId);
+              allow list: if isOwner(userId);
+            }
+        }
+
+        /**
+         * @description Restricts access to the user's orders to the authenticated user.
+         * Allows admins to list all orders via a collection group query.
+         * @path /users/{userId}/orders/{orderId}
+         * @allow (get, create, update, delete) Authenticated user can access and modify their own orders.
+         * @allow (list) User can list their own orders.
+         * @principle Enforces document ownership for the user's orders while allowing admin access.
+         */
+        match /orders/{orderId} {
+          allow get, create, update, delete: if isOwner(userId);
+          allow list: if isOwner(userId);
+
+            /**
+             * @description Restricts access to items within a specific order to the authenticated user.
+             * @path /users/{userId}/orders/{orderId}/orderItems/{orderItemId}
+             * @allow (get, create, update, delete) Authenticated user can access and modify items within their own orders.
+             * @deny (list) No public listing of order items.
+             * @principle Enforces document ownership for items within the user's orders.
+             */
+            match /orderItems/{orderItemId} {
+              allow get, create, update, delete: if isOwner(userId);
+              allow list: if isOwner(userId);
+            }
+        }
+
+        /**
+         * @description Restricts access to the user's wishlist to the authenticated user.
+         * @path /users/{userId}/wishlist
+         * @allow (get, create, update, delete) Authenticated user can access and modify their own wishlist.
+         * @deny (list) No public listing of user wishlists.
+         * @principle Enforces document ownership for the user's wishlist.
+         */
+        match /wishlist {
+          allow get, create, update, delete: if isOwner(userId);
+          allow list: if isOwner(userId);
+        }
     }
 
+    // --- Collection Group Rules ---
+    
     /**
-     * @description Restricts access to the user's cart to the authenticated user.
-     * @path /users/{userId}/cart
-     * @allow (get, create, update, delete) Authenticated user can access and modify their own cart.
-     * @deny (list) No public listing of user carts.
-     * @principle Enforces document ownership for the user's cart.
-     */
-    match /users/{userId}/cart {
-      allow get, create, update, delete: if isSignedIn() && isOwner(userId);
-      allow list: if isOwner(userId);
-    }
-
-    /**
-     * @description Restricts access to items in the user's cart to the authenticated user.
-     * @path /users/{userId}/cart/cartItems/{cartItemId}
-     * @allow (get, create, update, delete) Authenticated user can access and modify items in their own cart.
-     * @deny (list) No public listing of cart items.
-     * @principle Enforces document ownership for items in the user's cart.
-     */
-    match /users/{userId}/cart/cartItems/{cartItemId} {
-      allow get, create, update, delete: if isOwner(userId);
-      allow list: if isOwner(userId);
-    }
-
-    /**
-     * @description Restricts access to the user's orders to the authenticated user.
-     * Allows admins to list all orders via a collection group query.
+     * @description Allows admins to query across all 'orders' collections.
      * @path /users/{userId}/orders/{orderId}
-     * @allow (get, create, update, delete) Authenticated user can access and modify their own orders.
-     * @allow (list) User can list their own orders.
-     * @principle Enforces document ownership for the user's orders while allowing admin access.
+     * @allow (list) Signed-in users can list all orders (for admin panel).
+     * @principle Enables admin functionality with collection group queries.
      */
-    match /users/{userId}/orders/{orderId} {
-      allow get, create, update, delete: if isOwner(userId);
-      allow list: if isOwner(userId);
-
-      // This rule is for collection group queries.
-      // We assume an admin role would be checked here in a real app.
+    match /{path=**}/orders/{orderId} {
+       // We assume an admin role would be checked here in a real app.
       // For now, any signed-in user can list all orders for the admin panel.
       allow list: if isSignedIn();
     }
 
-
-    /**
-     * @description Restricts access to items within a specific order to the authenticated user.
-     * @path /users/{userId}/orders/{orderId}/orderItems/{orderItemId}
-     * @allow (get, create, update, delete) Authenticated user can access and modify items within their own orders.
-     * @deny (list) No public listing of order items.
-     * @principle Enforces document ownership for items within the user's orders.
-     */
-    match /users/{userId}/orders/{orderId}/orderItems/{orderItemId} {
-      allow get, create, update, delete: if isOwner(userId);
-      allow list: if isOwner(userId);
-    }
-
-    /**
-     * @description Restricts access to the user's wishlist to the authenticated user.
-     * @path /users/{userId}/wishlist
-     * @allow (get, create, update, delete) Authenticated user can access and modify their own wishlist.
-     * @deny (list) No public listing of user wishlists.
-     * @principle Enforces document ownership for the user's wishlist.
-     */
-    match /users/{userId}/wishlist {
-      allow get, create, update, delete: if isOwner(userId);
-      allow list: if isOwner(userId);
-    }
 
     // --- Helper Functions ---
 
