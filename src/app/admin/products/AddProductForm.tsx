@@ -31,7 +31,7 @@ const productSchema = z.object({
   price: z.object({
     usd: z.coerce.number().positive('USD price must be a positive number.'),
     ghs: z.coerce.number().positive('GHS price must be a positive number.'),
-    eur: zcoerce.number().positive('EUR price must be a positive number.'),
+    eur: z.coerce.number().positive('EUR price must be a positive number.'),
   }),
   description: z.string().min(10, 'Description must be at least 10 characters.'),
   story: z.string().min(10, 'Story must be at least 10 characters.'),
@@ -367,5 +367,3 @@ export function AddProductForm() {
     </Card>
   );
 }
-
-    
