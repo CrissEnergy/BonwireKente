@@ -1,14 +1,26 @@
 'use client';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { DollarSign, Package, ShoppingCart } from "lucide-react";
-import { products, orders } from "@/lib/placeholder-data";
+import { DollarSign, Package, ShoppingCart, Loader2 } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { collection, collectionGroup } from "firebase/firestore";
+import type { Order, Product } from "@/lib/types";
 
 export default function AdminDashboardPage() {
   const { formatPrice } = useAppContext();
-  const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
-  const totalOrders = orders.length;
-  const totalProducts = products.length;
+  const firestore = useFirestore();
+
+  const productsQuery = useMemoFirebase(() => collection(firestore, 'products'), [firestore]);
+  const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
+
+  const ordersQuery = useMemoFirebase(() => collectionGroup(firestore, 'orders'), [firestore]);
+  const { data: orders, isLoading: isLoadingOrders } = useCollection<Order>(ordersQuery);
+
+  const isLoading = isLoadingProducts || isLoadingOrders;
+
+  const totalRevenue = orders ? orders.reduce((sum, order) => sum + order.totalAmount, 0) : 0;
+  const totalOrders = orders ? orders.length : 0;
+  const totalProducts = products ? products.length : 0;
 
   const stats = [
     { title: "Total Revenue", value: formatPrice(totalRevenue), icon: DollarSign, description: "All-time sales" },
@@ -28,8 +40,14 @@ export default function AdminDashboardPage() {
               <stat.icon className="h-5 w-5 text-slate-300" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stat.value}</div>
-              <p className="text-xs text-slate-300">{stat.description}</p>
+              {isLoading ? (
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              ) : (
+                <>
+                  <div className="text-3xl font-bold">{stat.value}</div>
+                  <p className="text-xs text-slate-300">{stat.description}</p>
+                </>
+              )}
             </CardContent>
           </Card>
         ))}
