@@ -107,7 +107,7 @@ export function CheckoutClient() {
               return (
                 <div key={item.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="relative h-16 w-16 rounded-md overflow-hidden">
+                    <div className="relative h-16 w-16 rounded-lg overflow-hidden">
                       {image && <Image src={image.imageUrl} alt={item.name} fill className="object-cover" />}
                     </div>
                     <div>

@@ -42,7 +42,7 @@ export function CartClient() {
           const slug = item.patternName.toLowerCase().replace(/ /g, '-');
           return (
             <Card key={item.id} className="flex items-center p-4 bg-card/60 backdrop-blur-sm border-white/20">
-              <div className="relative h-24 w-24 rounded-md overflow-hidden mr-4">
+              <div className="relative h-24 w-24 rounded-lg overflow-hidden mr-4">
                 {image && (
                   <Image
                     src={image.imageUrl}
