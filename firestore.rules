@@ -1,0 +1,137 @@
+/**
+ * @fileoverview Firestore Security Rules for BonwiriKentey e-commerce platform.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for user-specific data and allows public read access to product information.
+ * Write access to user data is restricted to the authenticated user. Data validation is minimal to allow for rapid prototyping.
+ *
+ * Data Structure:
+ * - /products/{productId}: Publicly readable product information.
+ * - /users/{userId}: User profile data, accessible only to the user.
+ * - /users/{userId}/cart: User's cart, accessible only to the user.
+ * - /users/{userId}/cart/cartItems/{cartItemId}: Items in the user's cart, accessible only to the user.
+ * - /users/{userId}/orders/{orderId}: User's orders, accessible only to the user.
+ * - /users/{userId}/orders/{orderId}/orderItems/{orderItemId}: Items within a specific order, accessible only to the user.
+ * - /users/{userId}/wishlist: User's wishlist, accessible only to the user.
+ *
+ * Key Security Decisions:
+ * - Products are publicly readable but only writeable through the Firebase console.
+ * - Users can only access their own profile data, cart, orders, and wishlist.
+ * - No user listing is allowed to protect user privacy.
+ *
+ * Denormalization for Authorization:
+ *  - The data model is designed to avoid `get()` calls in security rules by nesting user-specific data under the `/users/{userId}` path.
+ *  - The `userId` is used in the path to ensure that only the authenticated user can access their own data.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows public read access to product information.
+     * @path /products/{productId}
+     * @allow (get, list) Public access to read product information.
+     * @deny (create, update, delete) No public access to modify product information.
+     * @principle Allows public read access to product information, while write access is restricted.
+     */
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Restricts access to user profile data to the authenticated user.
+     * @path /users/{userId}
+     * @allow (create) Authenticated user can create their own profile.
+     * @allow (get, update, delete) Authenticated user can access and modify their own profile.
+     * @deny (list) No public listing of user profiles.
+     * @deny (create, update, delete) Unauthorized user cannot create, update or delete another user's profile.
+     * @principle Enforces document ownership for user profile data.
+     */
+    match /users/{userId} {
+      allow get, update, delete: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow list: if false;
+    }
+
+    /**
+     * @description Restricts access to the user's cart to the authenticated user.
+     * @path /users/{userId}/cart
+     * @allow (get, create, update, delete) Authenticated user can access and modify their own cart.
+     * @deny (list) No public listing of user carts.
+     * @principle Enforces document ownership for the user's cart.
+     */
+    match /users/{userId}/cart {
+      allow get, create, update, delete: if isSignedIn() && isOwner(userId);
+      allow list: if isOwner(userId);
+    }
+
+    /**
+     * @description Restricts access to items in the user's cart to the authenticated user.
+     * @path /users/{userId}/cart/cartItems/{cartItemId}
+     * @allow (get, create, update, delete) Authenticated user can access and modify items in their own cart.
+     * @deny (list) No public listing of cart items.
+     * @principle Enforces document ownership for items in the user's cart.
+     */
+    match /users/{userId}/cart/cartItems/{cartItemId} {
+      allow get, create, update, delete: if isOwner(userId);
+      allow list: if isOwner(userId);
+    }
+
+    /**
+     * @description Restricts access to the user's orders to the authenticated user.
+     * @path /users/{userId}/orders/{orderId}
+     * @allow (get, create, update, delete) Authenticated user can access and modify their own orders.
+     * @deny (list) No public listing of user orders.
+     * @principle Enforces document ownership for the user's orders.
+     */
+    match /users/{userId}/orders/{orderId} {
+      allow get, create, update, delete: if isOwner(userId);
+      allow list: if isOwner(userId);
+    }
+
+    /**
+     * @description Restricts access to items within a specific order to the authenticated user.
+     * @path /users/{userId}/orders/{orderId}/orderItems/{orderItemId}
+     * @allow (get, create, update, delete) Authenticated user can access and modify items within their own orders.
+     * @deny (list) No public listing of order items.
+     * @principle Enforces document ownership for items within the user's orders.
+     */
+    match /users/{userId}/orders/{orderId}/orderItems/{orderItemId} {
+      allow get, create, update, delete: if isOwner(userId);
+      allow list: if isOwner(userId);
+    }
+
+    /**
+     * @description Restricts access to the user's wishlist to the authenticated user.
+     * @path /users/{userId}/wishlist
+     * @allow (get, create, update, delete) Authenticated user can access and modify their own wishlist.
+     * @deny (list) No public listing of user wishlists.
+     * @principle Enforces document ownership for the user's wishlist.
+     */
+    match /users/{userId}/wishlist {
+      allow get, create, update, delete: if isOwner(userId);
+      allow list: if isOwner(userId);
+    }
+
+    // --- Helper Functions ---
+
+    /**
+     * @description Checks if the user is signed in.
+     * @return {boolean} True if the user is signed in, false otherwise.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the authenticated user is the owner of the document.
+     * @param {string} userId The user ID to compare with the authenticated user's ID.
+     * @return {boolean} True if the user is the owner, false otherwise.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+  }
+}
