@@ -79,6 +79,7 @@ export function AddProductForm() {
       setImagePreviews(newImagePreviews);
       setFeaturedImageIndex(0); // Reset to first image on new selection
 
+      // Cleanup function to revoke the object URLs
       return () => {
         newImagePreviews.forEach(url => URL.revokeObjectURL(url));
       };
