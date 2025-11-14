@@ -1,3 +1,6 @@
+
+'use client'
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -5,11 +8,27 @@ import { ProductCard } from '@/components/products/ProductCard';
 import { products } from '@/lib/placeholder-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ArrowRight } from 'lucide-react';
+import React from 'react';
+import Autoplay from "embla-carousel-autoplay";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
-  const aboutImage = PlaceHolderImages.find(img => img.id === 'about-us-image');
   const featuredProducts = products.slice(0, 4);
+
+  const homeCarouselImages = [
+    PlaceHolderImages.find(img => img.id === 'homepage-carousel-1'),
+    PlaceHolderImages.find(img => img.id === 'homepage-carousel-2'),
+    PlaceHolderImages.find(img => img.id === 'homepage-carousel-3'),
+  ].filter(Boolean);
+
+  const plugin = React.useRef(
+      Autoplay({ delay: 3000, stopOnInteraction: true })
+  )
 
   return (
     <div className="space-y-16 md:space-y-24 pb-24 animate-fade-in-up">
@@ -82,17 +101,28 @@ export default function Home() {
                  </Button>
             </div>
             <div>
-                 <div className="aspect-w-4 aspect-h-3 rounded-lg overflow-hidden shadow-lg">
-                    {aboutImage && (
-                        <Image
-                            src={aboutImage.imageUrl}
-                            alt={aboutImage.description}
-                            fill
-                            className="object-cover"
-                            data-ai-hint={aboutImage.imageHint}
-                        />
-                    )}
-                 </div>
+                 <Carousel
+                    plugins={[plugin.current]}
+                    className="w-full rounded-lg overflow-hidden shadow-lg"
+                    onMouseEnter={plugin.current.stop}
+                    onMouseLeave={plugin.current.reset}
+                    >
+                    <CarouselContent>
+                        {homeCarouselImages.map((image, index) => image && (
+                        <CarouselItem key={index}>
+                            <div className="aspect-w-4 aspect-h-3 relative">
+                                <Image
+                                    src={image.imageUrl}
+                                    alt={image.description}
+                                    fill
+                                    className="object-cover"
+                                    data-ai-hint={image.imageHint}
+                                />
+                            </div>
+                        </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                </Carousel>
             </div>
          </div>
       </section>

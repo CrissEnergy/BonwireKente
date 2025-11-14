@@ -95,6 +95,24 @@
       "description": "A collection of different Kente cloth designs.",
       "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEYPtJRjto66SgvxWJs4hFIa52PB21Dv909Q&s",
       "imageHint": "kente designs"
+    },
+    {
+      "id": "homepage-carousel-1",
+      "description": "A wide shot of the Bonwire Kente village in Ghana.",
+      "imageUrl": "https://visitghana.com/wp-content/uploads/2025/04/8776-bonwire-kente-village.jpg",
+      "imageHint": "bonwire village"
+    },
+    {
+      "id": "homepage-carousel-2",
+      "description": "A close-up of a colorful Kente cloth pattern.",
+      "imageUrl": "https://reapp.com.gh/wp-content/uploads/2023/05/237696171.png",
+      "imageHint": "kente pattern"
+    },
+    {
+      "id": "homepage-carousel-3",
+      "description": "A collection of different Kente cloth designs.",
+      "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEYPtJRjto66SgvxWJs4hFIa52PB21Dv909Q&s",
+      "imageHint": "kente designs"
     }
   ]
 }
