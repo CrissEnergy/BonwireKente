@@ -72,6 +72,7 @@ export function EditProductForm({ product }: EditProductFormProps) {
         if (!firestore) throw new Error("Firestore not available");
         const productDocRef = doc(firestore, 'products', product.id);
 
+        // Note: Image editing is not handled here. Users must create a new product to change images.
         const productDataToUpdate = {
           ...values,
         };
@@ -109,7 +110,7 @@ export function EditProductForm({ product }: EditProductFormProps) {
             
             <FormItem>
               <FormLabel>Current Images</FormLabel>
-              <FormDescription>To change images, please go to the "Add Product" page and create a new product entry.</FormDescription>
+              <FormDescription>To change images, please create a new product. Image editing is not supported on this form.</FormDescription>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
                   {product.images && product.images.map((imageUrl, index) => (
                       <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-white/20">
@@ -330,3 +331,5 @@ export function EditProductForm({ product }: EditProductFormProps) {
     </Card>
   );
 }
+
+    
