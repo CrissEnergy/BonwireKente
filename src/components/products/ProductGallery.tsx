@@ -1,19 +1,34 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface ProductGalleryProps {
-  images: string[];
+  images: string[]; // URLs
+  name: string;
 }
 
-export function ProductGallery({ images }: ProductGalleryProps) {
-  const [mainImageId, setMainImageId] = useState(images[0]);
-  const mainImage = PlaceHolderImages.find(img => img.id === mainImageId);
-  const galleryImages = images.map(id => PlaceHolderImages.find(img => img.id === id)).filter(Boolean);
+export function ProductGallery({ images, name }: ProductGalleryProps) {
+  const [mainImage, setMainImage] = useState(images[0]);
+
+  useEffect(() => {
+    setMainImage(images[0]);
+  }, [images]);
+
+  if (!images || images.length === 0) {
+    return (
+         <Card className="overflow-hidden group bg-card/60 backdrop-blur-sm border-white/20">
+            <CardContent className="p-0">
+            <div className="aspect-w-1 aspect-h-1 relative bg-muted flex items-center justify-center">
+                <p className="text-muted-foreground">No Image</p>
+            </div>
+            </CardContent>
+        </Card>
+    );
+  }
 
   return (
     <div className="space-y-4 sticky top-20">
@@ -22,36 +37,34 @@ export function ProductGallery({ images }: ProductGalleryProps) {
           <div className="aspect-w-1 aspect-h-1 relative">
             {mainImage && (
               <Image
-                src={mainImage.imageUrl}
-                alt={mainImage.description}
+                src={mainImage}
+                alt={name}
                 fill
                 className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
-                data-ai-hint={mainImage.imageHint}
               />
             )}
           </div>
         </CardContent>
       </Card>
       <div className="grid grid-cols-4 gap-4">
-        {galleryImages.map((image, index) => image && (
+        {images.map((image, index) => (
           <button
             key={index}
-            onClick={() => setMainImageId(image.id)}
+            onClick={() => setMainImage(image)}
             className={cn(
               "block rounded-lg overflow-hidden border-2 transition",
-              mainImageId === image.id ? 'border-primary' : 'border-transparent'
+              mainImage === image ? 'border-primary' : 'border-transparent'
             )}
           >
             <div className="aspect-w-1 aspect-h-1 relative">
               <Image
-                src={image.imageUrl}
-                alt={image.description}
+                src={image}
+                alt={`${name} thumbnail ${index + 1}`}
                 fill
                 className="object-cover"
                 sizes="10vw"
-                data-ai-hint={image.imageHint}
               />
             </div>
           </button>

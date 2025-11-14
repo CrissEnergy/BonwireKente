@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -12,8 +13,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import { kentePatternInsights, KentePatternInsightsOutput } from "@/ai/flows/kente-pattern-insights";
-import { products } from "@/lib/placeholder-data";
-import { PlaceHolderImages, ImagePlaceholder } from '@/lib/placeholder-images';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
+import type { Product } from "@/lib/types";
 
 const formSchema = z.object({
   patternName: z.string().min(2, {
@@ -23,11 +26,16 @@ const formSchema = z.object({
 
 export function KenteGuideClient() {
   const [insights, setInsights] = useState<KentePatternInsightsOutput | null>(null);
-  const [patternImage, setPatternImage] = useState<ImagePlaceholder | null>(null);
+  const [patternImage, setPatternImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const guideImage = PlaceHolderImages.find(img => img.id === 'kente-guide-image');
+  
+  const firestore = useFirestore();
+  const productsQuery = useMemoFirebase(() => collection(firestore, 'products'), [firestore]);
+  const { data: products } = useCollection<Product>(productsQuery);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,14 +50,14 @@ export function KenteGuideClient() {
     setInsights(null);
     setPatternImage(null);
     try {
-      // Find product and its image
-      const product = products.find(p => p.patternName.toLowerCase() === values.patternName.toLowerCase());
-      if (product && product.images.length > 0) {
-        const image = PlaceHolderImages.find(img => img.id === product.images[0]);
-        if(image) setPatternImage(image);
-      } else {
-        const defaultImage = PlaceHolderImages.find(img => img.id === 'kente-insights-default');
-        if(defaultImage) setPatternImage(defaultImage);
+      if (products) {
+          const product = products.find(p => p.patternName.toLowerCase() === values.patternName.toLowerCase());
+          if (product && product.imageUrl) {
+              setPatternImage(product.imageUrl);
+          } else {
+              const defaultImage = PlaceHolderImages.find(img => img.id === 'kente-insights-default');
+              if(defaultImage) setPatternImage(defaultImage.imageUrl);
+          }
       }
 
       const result = await kentePatternInsights(values);
@@ -127,11 +135,10 @@ export function KenteGuideClient() {
             {patternImage && (
                 <div className="relative aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-lg">
                     <Image
-                        src={patternImage.imageUrl}
-                        alt={patternImage.description}
+                        src={patternImage}
+                        alt={`Image for ${form.getValues('patternName')}`}
                         fill
                         className="object-cover"
-                        data-ai-hint={patternImage.imageHint}
                     />
                 </div>
             )}

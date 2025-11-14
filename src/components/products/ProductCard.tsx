@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import type { Product } from '@/lib/types';
 import { useAppContext } from '@/context/AppContext';
 import { useToast } from '@/hooks/use-toast';
@@ -19,8 +18,6 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart, toggleWishlist, isInWishlist, formatPrice } = useAppContext();
   const { toast } = useToast();
-  const image = PlaceHolderImages.find(img => img.id === product.images[0]);
-  const slug = product.patternName.toLowerCase().replace(/ /g, '-');
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,18 +40,20 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const productInWishlist = isInWishlist(product.id);
 
+  // The slug is now the product ID
+  const slug = product.id;
+
   return (
     <Card className="overflow-hidden flex flex-col group bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
       <Link href={`/shop/${slug}`} className="block">
         <CardContent className="p-0">
           <div className="aspect-w-3 aspect-h-4 relative">
-            {image && (
+            {product.imageUrl && (
               <Image
-                src={image.imageUrl}
+                src={product.imageUrl}
                 alt={product.name}
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
-                data-ai-hint={image.imageHint}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               />
             )}

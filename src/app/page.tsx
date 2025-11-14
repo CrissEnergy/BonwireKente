@@ -5,9 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/products/ProductCard';
-import { products } from '@/lib/placeholder-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import React from 'react';
 import Autoplay from "embla-carousel-autoplay";
 import {
@@ -15,10 +14,21 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
+import type { Product } from '@/lib/types';
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
-  const featuredProducts = products.slice(0, 4);
+  const firestore = useFirestore();
+  
+  const productsQuery = useMemoFirebase(() => {
+      if (!firestore) return null;
+      return collection(firestore, 'products');
+  }, [firestore]);
+
+  const { data: products, isLoading } = useCollection<Product>(productsQuery);
+  const featuredProducts = products ? products.slice(0, 4) : [];
 
   const homeCarouselImages = [
     PlaceHolderImages.find(img => img.id === 'homepage-carousel-1'),
@@ -64,11 +74,17 @@ export default function Home() {
       {/* Featured Products */}
       <section className="container">
         <h2 className="text-3xl font-bold text-center font-headline mb-8">Featured Weaves</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {featuredProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {isLoading ? (
+             <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+        ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {featuredProducts.map(product => (
+                <ProductCard key={product.id} product={product} />
+            ))}
+            </div>
+        )}
         <div className="text-center mt-12">
             <Button asChild variant="outline">
                 <Link href="/shop">View All Products</Link>

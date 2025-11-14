@@ -7,17 +7,16 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 
-const availableColors = ['Gold', 'Red', 'Black', 'Green', 'Blue', 'White', 'Orange'];
 const availableOccasions = ['Traditional', 'Wedding', 'Festival', 'Naming Ceremony', 'Everyday'];
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'];
 const availableAudience = ['Unisex', 'For Men', 'For Women'];
 
 type Filters = {
-    colors: string[];
     priceRange: [number, number];
     occasions: string[];
     categories: string[];
     audience: string[];
+    tags: string[];
 };
 
 interface ProductFiltersProps {
@@ -27,7 +26,7 @@ interface ProductFiltersProps {
 
 export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
 
-    const handleCheckboxChange = (filterType: keyof Filters, value: string) => {
+    const handleCheckboxChange = (filterType: 'categories' | 'audience' | 'occasions' | 'tags', value: string) => {
         setFilters(prev => {
             const currentValues = prev[filterType] as string[];
             const newValues = currentValues.includes(value)
@@ -115,23 +114,6 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
                     </div>
                 </div>
 
-                <Separator />
-
-                <div>
-                    <h4 className="font-semibold mb-4">Color</h4>
-                    <div className="space-y-2">
-                        {availableColors.map(color => (
-                            <div key={color} className="flex items-center space-x-2">
-                                <Checkbox
-                                    id={`color-${color}`}
-                                    checked={filters.colors.includes(color)}
-                                    onCheckedChange={() => handleCheckboxChange('colors', color)}
-                                />
-                                <Label htmlFor={`color-${color}`}>{color}</Label>
-                            </div>
-                        ))}
-                    </div>
-                </div>
             </CardContent>
         </Card>
     );

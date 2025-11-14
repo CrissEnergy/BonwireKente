@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -9,8 +10,6 @@ export interface Product {
   imageUrl: string; // The primary image URL
   category: 'Stoles & Sashes' | 'Full Cloths' | 'Accessories' | 'Ready-to-Wear';
   tags: ('Unisex' | 'For Men' | 'For Women' | 'Wedding' | 'Festival' | 'Everyday' | 'Traditional' | 'Naming Ceremony')[];
-  colors: string[];
-  customizationOptions?: { name: string; options: string[] }[];
 }
 
 export const CURRENCIES = {

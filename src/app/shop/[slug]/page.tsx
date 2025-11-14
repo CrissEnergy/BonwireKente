@@ -1,7 +1,8 @@
 
+'use client';
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { getProductBySlug, products as allProducts } from '@/lib/placeholder-data';
 import { ProductCard } from '@/components/products/ProductCard';
 import { ProductGallery } from '@/components/products/ProductGallery';
 import { Separator } from '@/components/ui/separator';
@@ -12,22 +13,58 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ProductPrice } from '@/components/products/ProductPrice';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent } from '@/components/ui/card';
-
-export async function generateStaticParams() {
-  return allProducts.map((product) => ({
-    slug: product.patternName.toLowerCase().replace(/ /g, '-'),
-  }));
-}
+import { useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
+import { doc, collection } from 'firebase/firestore';
+import type { Product } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
 
 export default function ProductPage({ params }: { params: { slug: string } }) {
-  const product = getProductBySlug(params.slug);
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
+  const firestore = useFirestore();
+
+  const productRef = useMemoFirebase(() => {
+    if (!firestore || !params.slug) return null;
+    // We assume slug is the document ID for simplicity
+    return doc(firestore, 'products', params.slug);
+  }, [firestore, params.slug]);
+
+  const { data: product, isLoading: isProductLoading } = useDoc<Product>(productRef);
+
+  const productsQuery = useMemoFirebase(() => {
+      if (!firestore) return null;
+      return collection(firestore, 'products');
+  }, [firestore]);
+  const { data: allProducts, isLoading: areProductsLoading } = useCollection<Product>(productsQuery);
+
+  const isLoading = isProductLoading || areProductsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="relative min-h-[calc(100vh-4rem)] w-full flex items-center justify-center">
+        {heroImage && (
+            <Image
+                src={heroImage.imageUrl}
+                alt={heroImage.description}
+                fill
+                className="object-cover blur-md scale-110"
+                data-ai-hint={heroImage.imageHint}
+            />
+        )}
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="relative z-10 flex justify-center items-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     notFound();
   }
 
-  const relatedProducts = allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+  const relatedProducts = allProducts 
+    ? allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4)
+    : [];
 
   return (
     <div className="relative min-h-screen w-full animate-fade-in-up">
@@ -43,7 +80,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
         <div className="absolute inset-0 bg-black/30" />
         <div className="relative z-10 container py-12">
             <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-                <ProductGallery images={product.images} />
+                <ProductGallery images={product.images} name={product.name}/>
                 
                 <Card className="bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
                     <CardContent className="p-6 space-y-6">
@@ -57,26 +94,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
                         <p className="text-muted-foreground leading-relaxed">{product.description}</p>
                         
-                        {product.customizationOptions && product.customizationOptions.length > 0 && (
-                        <div className="space-y-4">
-                            {product.customizationOptions.map((customization) => (
-                            <div key={customization.name} className="grid grid-cols-1 gap-2">
-                                <Label htmlFor={customization.name} className="text-base font-medium">{customization.name}</Label>
-                                <Select>
-                                <SelectTrigger id={customization.name} className="w-full md:w-2/3">
-                                    <SelectValue placeholder={`Select ${customization.name}`} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {customization.options.map(option => (
-                                    <SelectItem key={option} value={option.toLowerCase().replace(/ /g, '-')}>{option}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                                </Select>
-                            </div>
-                            ))}
-                        </div>
-                        )}
-
                         <div className="flex items-center gap-4">
                             <AddToCartButton product={product} />
                             <WishlistButton product={product} />
