@@ -19,6 +19,7 @@ import { useFirestore, useStorage } from '@/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'] as const;
 const availableTags = ['Unisex', 'For Men', 'For Women', 'Wedding', 'Festival', 'Everyday', 'Traditional', 'Naming Ceremony'] as const;
@@ -48,6 +49,7 @@ export function AddProductForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [featuredImageIndex, setFeaturedImageIndex] = useState(0);
   const firestore = useFirestore();
   const storage = useStorage();
 
@@ -72,17 +74,17 @@ export function AddProductForm() {
   const imageFiles = form.watch('images');
 
   useEffect(() => {
-    let newImagePreviews: string[] = [];
     if (imageFiles && imageFiles.length > 0) {
-      newImagePreviews = imageFiles.map(file => URL.createObjectURL(file));
+      const newImagePreviews = imageFiles.map(file => URL.createObjectURL(file));
       setImagePreviews(newImagePreviews);
+      setFeaturedImageIndex(0); // Reset to first image on new selection
+
+      return () => {
+        newImagePreviews.forEach(url => URL.revokeObjectURL(url));
+      };
     } else {
       setImagePreviews([]);
     }
-
-    return () => {
-      newImagePreviews.forEach(url => URL.revokeObjectURL(url));
-    };
   }, [imageFiles]);
 
   async function onSubmit(values: z.infer<typeof productSchema>) {
@@ -96,19 +98,30 @@ export function AddProductForm() {
         const newDocRef = doc(collection(firestore, 'products'));
         const newProductId = newDocRef.id;
 
-        const imageUrls = await Promise.all(
-            values.images.map(async (imageFile) => {
-                const imageRef = ref(storage, `products/${newProductId}/${imageFile.name}`);
-                await uploadBytes(imageRef, imageFile);
-                return await getDownloadURL(imageRef);
-            })
-        );
+        const uploadPromises = values.images.map(async (imageFile) => {
+            const imageRef = ref(storage, `products/${newProductId}/${imageFile.name}`);
+            await uploadBytes(imageRef, imageFile);
+            const url = await getDownloadURL(imageRef);
+            return { name: imageFile.name, url };
+        });
+        
+        const uploadedImages = await Promise.all(uploadPromises);
+
+        const featuredImageFile = values.images[featuredImageIndex];
+        const featuredImage = uploadedImages.find(img => img.name === featuredImageFile.name);
         
         const productData = {
-          ...values,
           id: newProductId,
-          images: imageUrls,
-          imageUrl: imageUrls[0] || ''
+          name: values.name,
+          patternName: values.patternName,
+          price: values.price,
+          description: values.description,
+          story: values.story,
+          category: values.category,
+          tags: values.tags,
+          featured: values.featured,
+          imageUrl: featuredImage ? featuredImage.url : (uploadedImages[0]?.url || ''),
+          images: uploadedImages.map(img => img.url),
         };
         
         await setDoc(newDocRef, productData);
@@ -286,7 +299,7 @@ export function AddProductForm() {
                     />
                   </FormControl>
                   <FormDescription>
-                    Upload up to 5 images. The first image will be the main display image.
+                    Upload up to 5 images. Click an image preview below to set it as the featured image.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -296,9 +309,17 @@ export function AddProductForm() {
             {imagePreviews.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                 {imagePreviews.map((previewUrl, index) => (
-                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-white/20">
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setFeaturedImageIndex(index)}
+                    className={cn(
+                        "relative aspect-square rounded-lg overflow-hidden border-4 transition-colors",
+                        featuredImageIndex === index ? "border-primary" : "border-transparent"
+                    )}
+                  >
                     <Image src={previewUrl} alt={`Preview ${index + 1}`} fill className="object-cover" />
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
