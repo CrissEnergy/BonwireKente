@@ -2,25 +2,40 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Heart, User, Search, ChevronDown, Menu } from 'lucide-react';
+import { ShoppingCart, Heart, User, Search, ChevronDown, Menu, LogOut, LogIn } from 'lucide-react';
 import { KentePatternIcon } from '@/components/icons/KentePatternIcon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { useAppContext } from '@/context/AppContext';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Currency, CURRENCIES } from '@/lib/types';
 import { Fragment, useEffect, useState } from 'react';
 import { LiveSearch } from './LiveSearch';
 import { ThemeToggle } from './ThemeToggle';
+import { useAuth, useUser } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { useToast } from '@/hooks/use-toast';
 
 export function Header() {
   const { cartItemCount, currency, setCurrency, wishlistItemCount } = useAppContext();
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
   
+  const handleSignOut = () => {
+    signOut(auth);
+    toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+    });
+  };
+
   const navLinks = [
     { href: '/shop', label: 'Shop' },
     { href: '/kente-guide', label: 'Kente Guide' },
@@ -30,7 +45,7 @@ export function Header() {
 
   if (!isClient) {
     return (
-      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg border-white/20">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg">
         <div className="container flex h-16 items-center">
           <div className="mr-4 hidden md:flex">
             <Link href="/" className="mr-6 flex items-center space-x-2">
@@ -44,7 +59,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg border-white/20">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg">
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
@@ -69,7 +84,7 @@ export function Header() {
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="bg-background/80 backdrop-blur-lg border-white/20">
+            <SheetContent side="left" className="bg-background/80 backdrop-blur-lg">
               <SheetHeader className="border-b pb-4 mb-4">
                   <SheetTitle>
                     <Link href="/" className="mr-6 flex items-center space-x-2">
@@ -122,12 +137,49 @@ export function Header() {
 
           <LiveSearch />
 
-          <Link href="/account" passHref>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-              <span className="sr-only">Account</span>
-            </Button>
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || "User"} />
+                  <AvatarFallback>
+                    <User className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {user ? (
+                <>
+                  <DropdownMenuItem disabled>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user.displayName || 'User'}</p>
+                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <Link href="/account" passHref>
+                    <DropdownMenuItem>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>My Account</span>
+                    </DropdownMenuItem>
+                  </Link>
+                   <DropdownMenuItem onClick={handleSignOut}>
+                     <LogOut className="mr-2 h-4 w-4" />
+                     <span>Sign Out</span>
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <Link href="/account" passHref>
+                  <DropdownMenuItem>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    <span>Sign In</span>
+                  </DropdownMenuItem>
+                </Link>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Link href="/wishlist" passHref>
             <Button variant="ghost" size="icon" className="relative">
               <Heart className="h-5 w-5" />
