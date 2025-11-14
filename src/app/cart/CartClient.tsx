@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { ProductPrice } from '@/components/products/ProductPrice';
+import { CURRENCIES } from '@/lib/types';
 
 export function CartClient() {
   const { cart, removeFromCart, updateCartQuantity, formatPrice, currency } = useAppContext();
@@ -41,7 +42,7 @@ export function CartClient() {
     <div className="grid lg:grid-cols-3 gap-12 items-start text-white">
       <div className="lg:col-span-2 space-y-6">
         {cart.map(item => {
-          const slug = item.patternName.toLowerCase().replace(/ /g, '-');
+          const slug = item.id;
           return (
             <Card key={item.id} className="flex items-center p-4 bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
               <div className="relative h-24 w-24 rounded-lg overflow-hidden mr-4">
