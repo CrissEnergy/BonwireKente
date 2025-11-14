@@ -19,14 +19,15 @@ import type { Product } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 
 export default function ProductPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
   const firestore = useFirestore();
 
   const productRef = useMemoFirebase(() => {
-    if (!firestore || !params.slug) return null;
+    if (!firestore || !slug) return null;
     // We assume slug is the document ID for simplicity
-    return doc(firestore, 'products', params.slug);
-  }, [firestore, params.slug]);
+    return doc(firestore, 'products', slug);
+  }, [firestore, slug]);
 
   const { data: product, isLoading: isProductLoading } = useDoc<Product>(productRef);
 
