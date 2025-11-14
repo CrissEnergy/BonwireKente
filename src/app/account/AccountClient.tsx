@@ -90,6 +90,8 @@ export function AccountClient() {
             title: "Avatar Updated",
             description: "Your new profile picture has been saved.",
         });
+        
+        router.refresh();
 
     } catch (error) {
         console.error("Error uploading avatar:", error);
