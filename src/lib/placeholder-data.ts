@@ -10,7 +10,7 @@ export const products: Product[] = [
     story: 'The name "Adwinasa" translates to "all motifs are used up," signifying the weaver has exhausted their repertoire of patterns in creating this complex design. It represents the pinnacle of skill and creativity.',
     images: ['kente-stole-1', 'kente-stole-2'],
     category: 'Stoles & Sashes',
-    tags: ['Unisex', 'Wedding', 'Festival'],
+    tags: ['Unisex', 'Wedding', 'Festival', 'Traditional'],
     colors: ['Gold', 'Red', 'Black', 'Green'],
     customizationOptions: [
       {
@@ -28,7 +28,7 @@ export const products: Product[] = [
     story: 'Meaning "one person does not rule a nation," this pattern is a visual representation of the Akan proverb about participatory democracy. It celebrates the idea that leadership requires counsel and community involvement.',
     images: ['full-cloth-1', 'full-cloth-2'],
     category: 'Full Cloths',
-    tags: ['For Men', 'For Women', 'Festival'],
+    tags: ['For Men', 'For Women', 'Festival', 'Traditional'],
     colors: ['Blue', 'Gold', 'White'],
   },
   {
@@ -64,7 +64,7 @@ export const products: Product[] = [
     story: 'This pattern was designed in honor of the marriage between Ghana\'s first president, Kwame Nkrumah, and his Egyptian wife, Fathia. It symbolizes the bridging of cultures and the spirit of pan-Africanism.',
     images: ['kente-stole-2', 'kente-stole-1'],
     category: 'Stoles & Sashes',
-    tags: ['Unisex', 'Wedding'],
+    tags: ['Unisex', 'Wedding', 'Traditional'],
     colors: ['Green', 'Gold', 'Black', 'Red'],
   },
   {
@@ -76,7 +76,7 @@ export const products: Product[] = [
     story: '"Emaa Da" means "it has not happened before." This pattern represents innovation and new ideas, breaking from tradition while still honoring the craft of Kente weaving.',
     images: ['ready-to-wear-shirt'],
     category: 'Ready-to-Wear',
-    tags: ['For Men', 'Unisex', 'Everyday'],
+    tags: ['For Men', 'Unisex', 'Everyday', 'Festival'],
     colors: ['Blue', 'Orange', 'White'],
   }
 ];

@@ -7,7 +7,7 @@ export interface Product {
   story: string;
   images: string[];
   category: 'Stoles & Sashes' | 'Full Cloths' | 'Accessories' | 'Ready-to-Wear';
-  tags: ('Unisex' | 'For Men' | 'For Women' | 'Wedding' | 'Festival' | 'Everyday')[];
+  tags: ('Unisex' | 'For Men' | 'For Women' | 'Wedding' | 'Festival' | 'Everyday' | 'Traditional' | 'Naming Ceremony')[];
   colors: string[];
   customizationOptions?: { name: string; options: string[] }[];
 }

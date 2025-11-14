@@ -9,15 +9,17 @@ export default function ShopPage() {
   const [filters, setFilters] = useState({
     colors: [] as string[],
     priceRange: [0, 500] as [number, number],
+    occasions: [] as string[],
   });
 
   const filteredProducts = useMemo(() => {
     return allProducts.filter(product => {
       const inColor = filters.colors.length === 0 || product.colors.some(c => filters.colors.includes(c));
       const inPrice = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
-      return inColor && inPrice;
+      const inOccasion = filters.occasions.length === 0 || product.tags.some(t => filters.occasions.includes(t));
+      return inColor && inPrice && inOccasion;
     });
-  }, [filters, allProducts]);
+  }, [filters]);
 
   return (
     <div className="container py-12">

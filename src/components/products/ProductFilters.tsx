@@ -4,12 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { Separator } from '@/components/ui/separator';
 
 const availableColors = ['Gold', 'Red', 'Black', 'Green', 'Blue', 'White', 'Orange'];
+const availableOccasions = ['Traditional', 'Wedding', 'Festival', 'Naming Ceremony', 'Everyday'];
 
 interface ProductFiltersProps {
-    filters: { colors: string[]; priceRange: [number, number] };
-    setFilters: React.Dispatch<React.SetStateAction<{ colors: string[]; priceRange: [number, number] }>>;
+    filters: { colors: string[]; priceRange: [number, number]; occasions: string[] };
+    setFilters: React.Dispatch<React.SetStateAction<{ colors: string[]; priceRange: [number, number]; occasions: string[] }>>;
 }
 
 export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
@@ -20,6 +22,15 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
                 ? prev.colors.filter(c => c !== color)
                 : [...prev.colors, color];
             return { ...prev, colors: newColors };
+        });
+    };
+
+    const handleOccasionChange = (occasion: string) => {
+        setFilters(prev => {
+            const newOccasions = prev.occasions.includes(occasion)
+                ? prev.occasions.filter(o => o !== occasion)
+                : [...prev.occasions, occasion];
+            return { ...prev, occasions: newOccasions };
         });
     };
 
@@ -34,6 +45,40 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
             </CardHeader>
             <CardContent className="space-y-6">
                 <div>
+                    <h4 className="font-semibold mb-4">Price Range</h4>
+                    <Slider
+                        defaultValue={[0, 500]}
+                        max={500}
+                        step={10}
+                        onValueCommit={handlePriceChange}
+                    />
+                    <div className="flex justify-between text-sm text-muted-foreground mt-2">
+                        <span>${filters.priceRange[0]}</span>
+                        <span>${filters.priceRange[1]}</span>
+                    </div>
+                </div>
+
+                <Separator />
+                
+                <div>
+                    <h4 className="font-semibold mb-4">Occasion</h4>
+                    <div className="space-y-2">
+                        {availableOccasions.map(occasion => (
+                            <div key={occasion} className="flex items-center space-x-2">
+                                <Checkbox
+                                    id={`occasion-${occasion}`}
+                                    checked={filters.occasions.includes(occasion)}
+                                    onCheckedChange={() => handleOccasionChange(occasion)}
+                                />
+                                <Label htmlFor={`occasion-${occasion}`}>{occasion}</Label>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <Separator />
+
+                <div>
                     <h4 className="font-semibold mb-4">Color</h4>
                     <div className="space-y-2">
                         {availableColors.map(color => (
@@ -46,19 +91,6 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
                                 <Label htmlFor={`color-${color}`}>{color}</Label>
                             </div>
                         ))}
-                    </div>
-                </div>
-                <div>
-                    <h4 className="font-semibold mb-4">Price Range</h4>
-                    <Slider
-                        defaultValue={[0, 500]}
-                        max={500}
-                        step={10}
-                        onValueCommit={handlePriceChange}
-                    />
-                    <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                        <span>${filters.priceRange[0]}</span>
-                        <span>${filters.priceRange[1]}</span>
                     </div>
                 </div>
             </CardContent>
