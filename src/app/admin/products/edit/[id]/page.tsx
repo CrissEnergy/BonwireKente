@@ -6,9 +6,12 @@ import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Product } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 import { EditProductForm } from './EditProductForm';
+import { useParams } from 'next/navigation';
 
 
-export default function EditProductPage({ params: { id } }: { params: { id: string } }) {
+export default function EditProductPage() {
+  const params = useParams();
+  const id = params.id as string;
   const firestore = useFirestore();
   const productRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
