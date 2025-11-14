@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Heart, User, Menu, Search, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Heart, User, Search, ChevronDown, Menu } from 'lucide-react';
 import { KentePatternIcon } from '@/components/icons/KentePatternIcon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
@@ -9,6 +9,7 @@ import { useAppContext } from '@/context/AppContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Currency, CURRENCIES } from '@/lib/types';
 import { Fragment } from 'react';
+import { LiveSearch } from './LiveSearch';
 
 export function Header() {
   const { cartItemCount, currency, setCurrency } = useAppContext();
@@ -95,10 +96,8 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button variant="ghost" size="icon">
-            <Search className="h-5 w-5" />
-            <span className="sr-only">Search</span>
-          </Button>
+          <LiveSearch />
+
           <Link href="/account" passHref>
             <Button variant="ghost" size="icon">
               <User className="h-5 w-5" />
