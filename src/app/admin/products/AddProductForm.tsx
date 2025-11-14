@@ -16,9 +16,8 @@ import { Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirestore, useStorage } from '@/firebase';
-import { addDoc, collection, doc } from 'firebase/firestore';
+import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import Image from 'next/image';
 
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'] as const;
@@ -106,7 +105,7 @@ export function AddProductForm() {
           imageUrl: imageUrls[0] || ''
         };
         
-        await setDocumentNonBlocking(newDocRef, productData, {});
+        await setDoc(newDocRef, productData);
         
         toast({
             title: 'Product Added!',
@@ -353,5 +352,3 @@ export function AddProductForm() {
     </Card>
   );
 }
-
-    
