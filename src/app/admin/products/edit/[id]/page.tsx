@@ -8,8 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { EditProductForm } from './EditProductForm';
 
 
-export default function EditProductPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function EditProductPage({ params: { id } }: { params: { id: string } }) {
   const firestore = useFirestore();
   const productRef = useMemoFirebase(() => {
     if (!firestore || !id) return null;
@@ -41,4 +40,3 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     </div>
   );
 }
-
