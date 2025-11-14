@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -89,7 +90,8 @@ export function AddProductForm() {
         const fileSources = prev.filter(s => s.type === 'file');
         const existingUrlIds = new Set(newUrlSources.map(s => s.id));
         const oldUrlSources = prev.filter(s => s.type === 'url' && existingUrlIds.has(s.id));
-        return [...fileSources, ...oldUrlSources, ...newUrlSources.filter(s => !prev.some(p => p.id === s.id))];
+        const uniqueNewUrlSources = newUrlSources.filter(s => !prev.some(p => p.id === s.id));
+        return [...fileSources, ...oldUrlSources, ...uniqueNewUrlSources];
     });
 
   }, [urlInput]);
@@ -144,17 +146,16 @@ export function AddProductForm() {
         const newDocRef = doc(collection(firestore, 'products'));
         const newProductId = newDocRef.id;
 
-        const uploadedUrls = await Promise.all(
-            imageSources.map(async (source) => {
-                if (source.type === 'file') {
-                    const file = source.value as File;
-                    const imageRef = ref(storage, `products/${newProductId}/${uuidv4()}-${file.name}`);
-                    const snapshot = await uploadBytes(imageRef, file);
-                    return getDownloadURL(snapshot.ref);
-                }
-                return Promise.resolve(source.value as string);
-            })
-        );
+        const uploadPromises = imageSources.map(source => {
+            if (source.type === 'file') {
+                const file = source.value as File;
+                const imageRef = ref(storage, `products/${newProductId}/${uuidv4()}-${file.name}`);
+                return uploadBytes(imageRef, file).then(snapshot => getDownloadURL(snapshot.ref));
+            }
+            return Promise.resolve(source.value as string);
+        });
+
+        const uploadedUrls = await Promise.all(uploadPromises);
         
         const featuredImageSource = imageSources.find(s => s.id === featuredImageId);
         let featuredImageUrl = '';
@@ -368,3 +369,5 @@ export function AddProductForm() {
     </Card>
   );
 }
+
+    
