@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,7 +35,22 @@ export function AccountClient() {
   const auth = useAuth();
   const storage = useStorage();
   const { toast } = useToast();
+  const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    // If the user just logged in (isUserLoading is false and user is now available)
+    if (!isUserLoading && user) {
+        // Only redirect if they are on the account page, to avoid redirecting from other pages
+        if (window.location.pathname.includes('/account')) {
+            toast({
+                title: "Signed In",
+                description: "Welcome back!",
+            });
+            router.push('/');
+        }
+    }
+  }, [user, isUserLoading, router, toast]);
 
   const signInForm = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -105,6 +121,8 @@ export function AccountClient() {
   }
 
   if (user) {
+    // This part will briefly be rendered before the redirect kicks in.
+    // In a real app you might show a loading spinner here.
     return (
       <div className="flex justify-center items-center">
         <Card className="w-full max-w-md bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
