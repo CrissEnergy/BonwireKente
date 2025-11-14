@@ -3,7 +3,7 @@
 
 import type { Product, Currency } from '@/lib/types';
 import { CURRENCIES } from '@/lib/types';
-import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react';
 
 interface CartItem extends Product {
   quantity: number;
@@ -31,6 +31,31 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [currency, setCurrency] = useState<Currency>('USD');
+
+  useEffect(() => {
+    const fetchLocationAndSetCurrency = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        if (!response.ok) {
+          throw new Error('Failed to fetch location');
+        }
+        const data = await response.json();
+        const countryCode = data.country_code;
+
+        if (countryCode === 'GH') {
+          setCurrency('GHS');
+        } else {
+          setCurrency('USD');
+        }
+      } catch (error) {
+        console.error("Could not set currency based on location:", error);
+        // Default to USD if the fetch fails
+        setCurrency('USD');
+      }
+    };
+
+    fetchLocationAndSetCurrency();
+  }, []);
 
   const formatPrice = (price: number) => {
     const { symbol, rate } = CURRENCIES[currency];
