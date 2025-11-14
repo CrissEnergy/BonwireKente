@@ -9,12 +9,18 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose 
 import { useAppContext } from '@/context/AppContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Currency, CURRENCIES } from '@/lib/types';
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { LiveSearch } from './LiveSearch';
 import { ThemeToggle } from './ThemeToggle';
 
 export function Header() {
   const { cartItemCount, currency, setCurrency, wishlistItemCount } = useAppContext();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
   const navLinks = [
     { href: '/shop', label: 'Shop' },
     { href: '/kente-guide', label: 'Kente Guide' },
@@ -82,7 +88,7 @@ export function Header() {
 
 
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <ThemeToggle />
+         {isClient && <ThemeToggle />}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="flex items-center gap-1">
@@ -110,7 +116,7 @@ export function Header() {
           <Link href="/wishlist" passHref>
             <Button variant="ghost" size="icon" className="relative">
               <Heart className="h-5 w-5" />
-              {wishlistItemCount > 0 && (
+              {isClient && wishlistItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs">
                   {wishlistItemCount}
                 </span>
@@ -121,7 +127,7 @@ export function Header() {
           <Link href="/cart" passHref>
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
-              {cartItemCount > 0 && (
+              {isClient && cartItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs">
                   {cartItemCount}
                 </span>
