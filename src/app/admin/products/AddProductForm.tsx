@@ -15,13 +15,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, Upload, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirestore, useStorage } from '@/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
 import { v4 as uuidv4 } from 'uuid';
 
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'] as const;
@@ -74,17 +73,6 @@ export function AddProductForm() {
     },
   });
   
-  const urlInput = form.watch('imageUrl');
-  useEffect(() => {
-      if (urlInput && (!imageSource || imageSource.type !== 'file')) {
-          setImageSource({
-              type: 'url',
-              value: urlInput,
-              preview: urlInput
-          });
-      }
-  }, [urlInput, imageSource]);
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -99,6 +87,20 @@ export function AddProductForm() {
       form.setValue('imageUrl', ''); // Clear URL input if a file is chosen
     }
   };
+
+  const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const url = event.target.value;
+    form.setValue('imageUrl', url);
+    if(url) {
+      setImageSource({
+        type: 'url',
+        value: url,
+        preview: url
+      });
+    } else {
+      setImageSource(null);
+    }
+  }
 
   const removeImage = () => {
     if(imageSource && imageSource.type === 'file'){
@@ -255,7 +257,13 @@ export function AddProductForm() {
                  <FormField control={form.control} name="imageUrl" render={({ field }) => (
                     <FormItem>
                       <FormLabel>...or Paste Image URL</FormLabel>
-                      <FormControl><Input placeholder="Paste image URL" {...field} /></FormControl>
+                      <FormControl>
+                        <Input 
+                            placeholder="Paste image URL" 
+                            {...field}
+                            onChange={handleUrlChange}
+                        />
+                      </FormControl>
                     </FormItem>
                   )}/>
              </div>
@@ -325,5 +333,3 @@ export function AddProductForm() {
     </Card>
   );
 }
-
-    
