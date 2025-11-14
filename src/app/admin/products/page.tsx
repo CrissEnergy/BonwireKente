@@ -1,5 +1,6 @@
 'use client';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,9 +17,11 @@ export default function AdminProductsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-bold font-headline text-white">Products</h1>
-        <Button className="bg-primary hover:bg-primary/90">
-            <PlusCircle className="mr-2 h-5 w-5"/>
-            Add Product
+        <Button asChild className="bg-primary hover:bg-primary/90">
+            <Link href="/admin/products/new">
+                <PlusCircle className="mr-2 h-5 w-5"/>
+                Add Product
+            </Link>
         </Button>
       </div>
 
