@@ -14,9 +14,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useFirestore, useStorage } from '@/firebase';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { collection } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { v4 as uuidv4 } from 'uuid';
 
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'] as const;
 const availableTags = ['Unisex', 'For Men', 'For Women', 'Wedding', 'Festival', 'Everyday', 'Traditional', 'Naming Ceremony'] as const;
+
+// Define a schema for a single file
+const fileSchema = z.custom<File>(val => val instanceof File, 'Please upload a file.');
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters.'),
@@ -28,13 +36,15 @@ const productSchema = z.object({
   tags: z.array(z.string()).refine(value => value.some(item => item), {
     message: 'You have to select at least one tag.',
   }),
-  images: z.string().min(1, 'Please enter at least one image ID.'),
+  images: z.array(fileSchema).min(1, 'Please upload at least one image.'),
 });
 
 export function AddProductForm() {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const firestore = useFirestore();
+  const storage = useStorage();
 
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
@@ -45,24 +55,55 @@ export function AddProductForm() {
       description: '',
       story: '',
       tags: [],
-      images: '',
+      images: [],
     },
   });
 
-  function onSubmit(values: z.infer<typeof productSchema>) {
+  async function onSubmit(values: z.infer<typeof productSchema>) {
     setIsSubmitting(true);
-    // In a real application, you would send this data to your backend/database.
-    console.log('New Product Data:', values);
+    
+    try {
+        const productCollectionRef = collection(firestore, 'products');
+        const newProductId = uuidv4();
 
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: 'Product Added!',
-        description: `${values.name} has been added to your store.`,
-      });
-      setIsSubmitting(false);
-      router.push('/admin/products');
-    }, 1500);
+        const imageUrls = await Promise.all(
+            values.images.map(async (imageFile) => {
+                const imageRef = ref(storage, `products/${newProductId}/${imageFile.name}`);
+                await uploadBytes(imageRef, imageFile);
+                return await getDownloadURL(imageRef);
+            })
+        );
+        
+        // This is a simplified version. We're storing URLs directly.
+        // In a real app, you might want a more structured way to link images.
+        // The first image URL will be the primary one.
+        const productData = {
+          ...values,
+          id: newProductId,
+          images: imageUrls, // Overwrite with URLs
+          imageUrl: imageUrls[0] || '' // For compatibility with existing product type
+        };
+        
+        // Using non-blocking update
+        await addDocumentNonBlocking(productCollectionRef, productData);
+        
+        toast({
+            title: 'Product Added!',
+            description: `${values.name} has been added to your store.`,
+        });
+        
+        router.push('/admin/products');
+
+    } catch (error) {
+        console.error("Error adding product: ", error);
+        toast({
+            variant: "destructive",
+            title: 'Error',
+            description: 'Failed to add the product. Please try again.',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   return (
@@ -169,20 +210,25 @@ export function AddProductForm() {
             />
 
             <FormField
-                control={form.control}
-                name="images"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Image IDs</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., kente-stole-1, kente-stole-2" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                        Enter comma-separated image IDs from placeholder-images.json.
-                    </FormDescription>
-                    <FormMessage />
-                    </FormItem>
-                )}
+              control={form.control}
+              name="images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Product Images</FormLabel>
+                  <FormControl>
+                     <Input 
+                        type="file" 
+                        multiple 
+                        accept="image/*"
+                        onChange={(e) => field.onChange(e.target.files ? Array.from(e.target.files) : [])}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Upload one or more images for the product.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
             
             <FormField
