@@ -16,7 +16,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addToCart, toggleWishlist, isInWishlist } = useAppContext();
+  const { addToCart, toggleWishlist, isInWishlist, formatPrice } = useAppContext();
   const { toast } = useToast();
   const image = PlaceHolderImages.find(img => img.id === product.images[0]);
   const slug = product.patternName.toLowerCase().replace(/ /g, '-');
@@ -76,7 +76,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <h3 className="font-semibold text-lg truncate">{product.name}</h3>
           <p className="text-sm text-muted-foreground">{product.patternName}</p>
         </Link>
-        <p className="text-lg font-bold mt-2 flex-grow">${product.price.toFixed(2)}</p>
+        <p className="text-lg font-bold mt-2 flex-grow">{formatPrice(product.price)}</p>
       </div>
       <CardFooter className="p-4 pt-0">
         <Button className="w-full" onClick={handleAddToCart}>

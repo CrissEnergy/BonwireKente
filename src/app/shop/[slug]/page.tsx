@@ -7,6 +7,7 @@ import { AddToCartButton } from '@/components/products/AddToCartButton';
 import { WishlistButton } from '@/components/products/WishlistButton';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ProductPrice } from '@/components/products/ProductPrice';
 
 export async function generateStaticParams() {
   return allProducts.map((product) => ({
@@ -31,7 +32,9 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
         <div className="py-4">
           <h1 className="text-3xl md:text-4xl font-bold font-headline">{product.name}</h1>
           <p className="text-lg text-muted-foreground mt-1">{product.patternName}</p>
-          <p className="text-3xl font-bold my-4">${product.price.toFixed(2)}</p>
+          <div className="my-4">
+            <ProductPrice price={product.price} className="text-3xl font-bold" />
+          </div>
 
           <p className="text-muted-foreground leading-relaxed">{product.description}</p>
           

@@ -11,7 +11,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 
 export function CartClient() {
-  const { cart, removeFromCart, updateCartQuantity } = useAppContext();
+  const { cart, removeFromCart, updateCartQuantity, formatPrice } = useAppContext();
   
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = 0; // Placeholder
@@ -56,7 +56,7 @@ export function CartClient() {
               <div className="flex-grow">
                 <Link href={`/shop/${slug}`} className="font-semibold hover:text-primary">{item.name}</Link>
                 <p className="text-sm text-muted-foreground">{item.patternName}</p>
-                <p className="text-lg font-bold mt-1">${item.price.toFixed(2)}</p>
+                <p className="text-lg font-bold mt-1">{formatPrice(item.price)}</p>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center border rounded-md">
@@ -84,7 +84,7 @@ export function CartClient() {
           <CardContent className="space-y-4">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>{formatPrice(subtotal)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Shipping</span>
@@ -93,7 +93,7 @@ export function CartClient() {
             <Separator />
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
-              <span>${total.toFixed(2)}</span>
+              <span>{formatPrice(total)}</span>
             </div>
           </CardContent>
           <CardFooter>

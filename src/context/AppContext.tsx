@@ -1,7 +1,8 @@
 "use client";
 
-import type { Product } from '@/lib/types';
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import type { Product, Currency } from '@/lib/types';
+import { CURRENCIES } from '@/lib/types';
+import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 
 interface CartItem extends Product {
   quantity: number;
@@ -10,6 +11,9 @@ interface CartItem extends Product {
 interface AppContextType {
   cart: CartItem[];
   wishlist: Product[];
+  currency: Currency;
+  setCurrency: (currency: Currency) => void;
+  formatPrice: (price: number) => string;
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;
@@ -23,7 +27,14 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
+  const [currency, setCurrency] = useState<Currency>('USD');
 
+  const formatPrice = (price: number) => {
+    const { symbol, rate } = CURRENCIES[currency];
+    const convertedPrice = price * rate;
+    return `${symbol}${convertedPrice.toFixed(2)}`;
+  };
+  
   const addToCart = (product: Product, quantity = 1) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
@@ -66,8 +77,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const cartItemCount = cart.reduce((count, item) => count + item.quantity, 0);
 
+  const contextValue = useMemo(() => ({
+    cart,
+    wishlist,
+    currency,
+    setCurrency,
+    formatPrice,
+    addToCart,
+    removeFromCart,
+    updateCartQuantity,
+    toggleWishlist,
+    isInWishlist,
+    cartItemCount
+  }), [cart, wishlist, currency]);
+
   return (
-    <AppContext.Provider value={{ cart, wishlist, addToCart, removeFromCart, updateCartQuantity, toggleWishlist, isInWishlist, cartItemCount }}>
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );

@@ -13,7 +13,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ShoppingCart } from 'lucide-react';
 
 export function CheckoutClient() {
-  const { cart } = useAppContext();
+  const { cart, formatPrice } = useAppContext();
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal; // Shipping will be handled later
 
@@ -115,14 +115,14 @@ export function CheckoutClient() {
                       <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                     </div>
                   </div>
-                  <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                  <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
                 </div>
               );
             })}
             <Separator />
             <div className="flex justify-between">
               <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-medium">${subtotal.toFixed(2)}</span>
+              <span className="font-medium">{formatPrice(subtotal)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Shipping</span>
@@ -131,7 +131,7 @@ export function CheckoutClient() {
             <Separator />
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
-              <span>${total.toFixed(2)}</span>
+              <span>{formatPrice(total)}</span>
             </div>
           </CardContent>
         </Card>

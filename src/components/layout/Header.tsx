@@ -1,14 +1,16 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Heart, User, Menu, Search } from 'lucide-react';
+import { ShoppingCart, Heart, User, Menu, Search, ChevronDown } from 'lucide-react';
 import { KentePatternIcon } from '@/components/icons/KentePatternIcon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAppContext } from '@/context/AppContext';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Currency, CURRENCIES } from '@/lib/types';
 
 export function Header() {
-  const { cartItemCount } = useAppContext();
+  const { cartItemCount, currency, setCurrency } = useAppContext();
   const navLinks = [
     { href: '/shop', label: 'Shop' },
     { href: '/kente-guide', label: 'Kente Guide' },
@@ -68,6 +70,22 @@ export function Header() {
 
 
         <div className="flex flex-1 items-center justify-end space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                {currency}
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {Object.keys(CURRENCIES).map(key => (
+                <DropdownMenuItem key={key} onClick={() => setCurrency(key as Currency)}>
+                  {key} ({CURRENCIES[key as Currency].symbol})
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button variant="ghost" size="icon">
             <Search className="h-5 w-5" />
             <span className="sr-only">Search</span>

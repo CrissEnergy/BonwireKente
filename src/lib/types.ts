@@ -2,7 +2,7 @@ export interface Product {
   id: string;
   name: string;
   patternName: string;
-  price: number;
+  price: number; // Base price in USD
   description: string;
   story: string;
   images: string[];
@@ -11,3 +11,11 @@ export interface Product {
   colors: string[];
   customizationOptions?: { name: string; options: string[] }[];
 }
+
+export const CURRENCIES = {
+  USD: { symbol: '$', rate: 1 },
+  EUR: { symbol: '€', rate: 0.93 },
+  GHS: { symbol: 'GH₵', rate: 14.80 },
+};
+
+export type Currency = keyof typeof CURRENCIES;
