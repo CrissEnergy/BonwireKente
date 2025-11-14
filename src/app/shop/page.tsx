@@ -26,7 +26,7 @@ export default function ShopPage() {
   }, [filters]);
 
   return (
-    <div className="container py-12">
+    <div className="container py-12 animate-fade-in-up">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4">Shop Our Collection</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

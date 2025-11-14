@@ -5,7 +5,7 @@ export default function AboutPage() {
     const aboutImage = PlaceHolderImages.find(img => img.id === 'about-us-image');
 
     return (
-        <div className="bg-secondary/30">
+        <div className="bg-secondary/30 animate-fade-in-up">
             <div className="container py-16 md:py-24">
                 <div className="text-center max-w-3xl mx-auto">
                     <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4">Our Story</h1>

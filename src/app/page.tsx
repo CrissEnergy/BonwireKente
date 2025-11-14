@@ -12,7 +12,7 @@ export default function Home() {
   const featuredProducts = products.slice(0, 4);
 
   return (
-    <div className="space-y-16 md:space-y-24 pb-24">
+    <div className="space-y-16 md:space-y-24 pb-24 animate-fade-in-up">
       {/* Hero Section */}
       <section className="relative h-[60vh] md:h-[80vh] w-full">
         {heroImage && (

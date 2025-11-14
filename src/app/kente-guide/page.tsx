@@ -3,7 +3,7 @@ import { KenteGuideClient } from "./KenteGuideClient";
 export default function KenteGuidePage() {
 
   return (
-    <div className="container py-12">
+    <div className="container py-12 animate-fade-in-up">
       <div className="text-center max-w-3xl mx-auto mb-12">
         <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4">Kente Pattern Guide</h1>
         <p className="text-lg text-muted-foreground">

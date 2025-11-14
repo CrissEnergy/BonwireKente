@@ -25,7 +25,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   const relatedProducts = allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
 
   return (
-    <div className="container py-12">
+    <div className="container py-12 animate-fade-in-up">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         <ProductGallery images={product.images} />
         
