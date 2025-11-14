@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Heart, User, Search, ChevronDown, Menu, LogOut, LogIn } from 'lucide-react';
+import { ShoppingCart, Heart, User, Search, ChevronDown, Menu, LogOut, LogIn, Shield } from 'lucide-react';
 import { KentePatternIcon } from '@/components/icons/KentePatternIcon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
@@ -103,6 +103,11 @@ export function Header() {
                     </SheetClose>
                   </Fragment>
                 ))}
+                 <SheetClose asChild>
+                      <Link href="/admin" className="text-lg transition-colors hover:text-primary p-2 rounded-md flex items-center">
+                        <Shield className="mr-2 h-5 w-5" /> Admin
+                      </Link>
+                  </SheetClose>
               </nav>
             </SheetContent>
           </Sheet>
@@ -162,6 +167,12 @@ export function Header() {
                     <DropdownMenuItem>
                         <User className="mr-2 h-4 w-4" />
                         <span>My Account</span>
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/admin" passHref>
+                    <DropdownMenuItem>
+                        <Shield className="mr-2 h-4 w-4" />
+                        <span>Admin</span>
                     </DropdownMenuItem>
                   </Link>
                    <DropdownMenuItem onClick={handleSignOut}>

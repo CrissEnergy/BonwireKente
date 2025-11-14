@@ -1,4 +1,4 @@
-import type { Product } from './types';
+import type { Order, Product } from './types';
 
 export const products: Product[] = [
   {
@@ -80,6 +80,52 @@ export const products: Product[] = [
     colors: ['Blue', 'Orange', 'White'],
   }
 ];
+
+export const orders: Order[] = [
+  {
+    id: "ORD001",
+    customerName: "Ama Serwaa",
+    date: "2024-05-20",
+    total: 110.00,
+    status: "Shipped",
+    items: [
+      { product: products[0], quantity: 1 },
+      { product: products[2], quantity: 1 }
+    ]
+  },
+  {
+    id: "ORD002",
+    customerName: "Kofi Annan",
+    date: "2024-05-22",
+    total: 450.00,
+    status: "Processing",
+    items: [
+      { product: products[1], quantity: 1 }
+    ]
+  },
+  {
+    id: "ORD003",
+    customerName: "Yaa Asantewaa",
+    date: "2024-05-23",
+    total: 180.00,
+    status: "Delivered",
+    items: [
+      { product: products[3], quantity: 1 }
+    ]
+  },
+    {
+    id: "ORD004",
+    customerName: "Kwame Nkrumah",
+    date: "2024-05-25",
+    total: 235.00,
+    status: "Pending",
+    items: [
+      { product: products[4], quantity: 1 },
+      { product: products[5], quantity: 1 }
+    ]
+  }
+];
+
 
 export const getProductById = (id: string) => products.find(p => p.id === id);
 export const getProductBySlug = (slug: string) => products.find(p => p.patternName.toLowerCase().replace(/ /g, '-') === slug);

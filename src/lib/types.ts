@@ -19,3 +19,15 @@ export const CURRENCIES = {
 };
 
 export type Currency = keyof typeof CURRENCIES;
+
+export interface Order {
+    id: string;
+    customerName: string;
+    date: string;
+    total: number;
+    status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+    items: {
+        product: Product;
+        quantity: number;
+    }[];
+}
