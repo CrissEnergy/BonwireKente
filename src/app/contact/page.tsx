@@ -22,7 +22,7 @@ export default function ContactPage() {
                     <div>
                         <h3 className="text-xl font-semibold">Email</h3>
                         <p className="text-muted-foreground">Reach out to us for any inquiries.</p>
-                        <a href="mailto:hello@bonwirikentey.com" className="text-primary font-medium">hello@bonwirikentey.com</a>
+                        <a href="mailto:hello@bonwirekente.com" className="text-primary font-medium">hello@bonwirekente.com</a>
                     </div>
                 </div>
                  <div className="flex items-start gap-4">

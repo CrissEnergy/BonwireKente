@@ -22,7 +22,7 @@ export function Header() {
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <KentePatternIcon className="h-8 w-8" />
-            <span className="hidden font-bold sm:inline-block font-headline text-2xl">Kente Kloth</span>
+            <span className="hidden font-bold sm:inline-block font-headline text-2xl">BonwireKente</span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             {navLinks.map(link => (
@@ -45,7 +45,7 @@ export function Header() {
             <SheetContent side="left">
               <Link href="/" className="mr-6 flex items-center space-x-2 mb-6">
                 <KentePatternIcon className="h-8 w-8" />
-                <span className="font-bold font-headline text-2xl">Kente Kloth</span>
+                <span className="font-bold font-headline text-2xl">BonwireKente</span>
               </Link>
               <nav className="flex flex-col space-y-4">
                 {navLinks.map(link => (
@@ -62,7 +62,7 @@ export function Header() {
         <div className="flex md:hidden justify-center flex-1">
              <Link href="/" className="flex items-center space-x-2">
                 <KentePatternIcon className="h-8 w-8" />
-                <span className="font-bold font-headline text-xl">Kente Kloth</span>
+                <span className="font-bold font-headline text-xl">BonwireKente</span>
               </Link>
         </div>
 

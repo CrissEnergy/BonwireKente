@@ -6,8 +6,8 @@ import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Kente Kloth - Wear Your Heritage',
-  description: 'Authentic Ghanaian Kente fabrics, accessories, and ready-to-wear items from BonwiriKentey.',
+  title: 'BonwireKente - Wear Your Heritage',
+  description: 'Authentic Ghanaian Kente fabrics, accessories, and ready-to-wear items from BonwireKente.',
 };
 
 export default function RootLayout({

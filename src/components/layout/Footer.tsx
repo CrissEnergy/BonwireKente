@@ -11,7 +11,7 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
               <KentePatternIcon className="h-8 w-8" />
-              <span className="font-bold font-headline text-2xl">Kente Kloth</span>
+              <span className="font-bold font-headline text-2xl">BonwireKente</span>
             </Link>
             <p className="text-sm text-muted-foreground">Wear Your Heritage</p>
           </div>
@@ -45,7 +45,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} BonwiriKentey. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} BonwireKente. All rights reserved.</p>
         </div>
       </div>
     </footer>

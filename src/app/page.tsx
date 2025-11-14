@@ -28,7 +28,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white p-4">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-headline leading-tight">
-            BonwiriKentey
+            BonwireKente
           </h1>
           <p className="mt-4 text-lg md:text-2xl max-w-2xl">
             Wear Your Heritage
@@ -75,7 +75,7 @@ export default function Home() {
          <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
                  <h2 className="text-3xl font-bold font-headline mb-4">From Ghana, With Pride</h2>
-                 <p className="text-muted-foreground mb-4">BonwiriKentey was born from a desire to share the vibrant legacy of Ghanaian Kente with the world. We partner directly with artisans in Ghana, ensuring every piece is authentic, ethically made, and carries the spirit of its creator.</p>
+                 <p className="text-muted-foreground mb-4">BonwireKente was born from a desire to share the vibrant legacy of Ghanaian Kente with the world. We partner directly with artisans in Ghana, ensuring every piece is authentic, ethically made, and carries the spirit of its creator.</p>
                  <p className="text-muted-foreground mb-6">Our mission is to make this celebrated art form a part of your story, connecting you to a rich heritage of craftsmanship and culture.</p>
                  <Button asChild variant="outline">
                     <Link href="/about">Learn More About Us</Link>
