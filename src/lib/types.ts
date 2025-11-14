@@ -21,12 +21,23 @@ export const CURRENCIES = {
 
 export type Currency = keyof typeof CURRENCIES;
 
+export type OrderStatus = 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'Refunded';
+
+export interface OrderItem {
+    id: string;
+    name: string;
+    quantity: number;
+    price: number;
+    imageUrl?: string;
+}
+
 export interface Order {
     id: string;
     userId: string;
     orderDate: string; // Should be ISO string
     totalAmount: number;
-    shippingAddress: string; // This might be an object in a real app
+    shippingAddress: string; 
     paymentMethod: string;
-    status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+    status: OrderStatus;
+    items: OrderItem[];
 }

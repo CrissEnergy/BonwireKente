@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Mail, Lock, Loader2, Edit } from 'lucide-react';
+import { User, Mail, Lock, Loader2, Edit, ShoppingCart } from 'lucide-react';
 import { useAuth, useUser, useStorage } from "@/firebase";
 import { signOut, updateProfile } from "firebase/auth";
 import { useForm } from "react-hook-form";
@@ -18,6 +18,7 @@ import { initiateEmailSignIn, initiateEmailSignUp } from "@/firebase/non-blockin
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { OrderHistory } from "./OrderHistory";
 
 const signInSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -39,9 +40,7 @@ export function AccountClient() {
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    // If the user just logged in (isUserLoading is false and user is now available)
     if (!isUserLoading && user) {
-        // Only redirect if they are on the account page, to avoid redirecting from other pages
         if (window.location.pathname.includes('/account')) {
             toast({
                 title: "Signed In",
@@ -66,9 +65,12 @@ export function AccountClient() {
     initiateEmailSignIn(auth, values.email, values.password);
   };
 
-  const handleSignUp = (values: z.infer<typeof signUpSchema>) => {
-    initiateEmailSignUp(auth, values.email, values.password);
-    // In a real app, you'd also update the user's profile with their name
+  const handleSignUp = async (values: z.infer<typeof signUpSchema>) => {
+      try {
+        await initiateEmailSignUp(auth, values.email, values.password, values.name);
+      } catch (error) {
+          console.error("Sign up error", error);
+      }
   };
 
   const handleSignOut = () => {
@@ -91,7 +93,9 @@ export function AccountClient() {
         const snapshot = await uploadBytes(storageRef, file);
         const photoURL = await getDownloadURL(snapshot.ref);
 
-        await updateProfile(user, { photoURL });
+        if(auth.currentUser){
+            await updateProfile(auth.currentUser, { photoURL });
+        }
         
         toast({
             title: "Avatar Updated",
@@ -121,35 +125,46 @@ export function AccountClient() {
   }
 
   if (user) {
-    // This part will briefly be rendered before the redirect kicks in.
-    // In a real app you might show a loading spinner here.
     return (
-      <div className="flex justify-center items-center">
-        <Card className="w-full max-w-md bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
-          <CardHeader className="text-center items-center">
-             <div className="relative">
-                <Avatar className="h-24 w-24 border-2 border-primary">
-                    <AvatarImage src={user.photoURL || undefined} alt={user.displayName || "User"} />
-                    <AvatarFallback>
-                        <User className="h-10 w-10" />
-                    </AvatarFallback>
-                </Avatar>
-                <Label htmlFor="avatar-upload" className="absolute -bottom-2 -right-2 cursor-pointer bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors">
-                   {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Edit className="h-5 w-5" />}
-                </Label>
-                <Input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={isUploading} />
-             </div>
+     <Tabs defaultValue="profile" className="w-full max-w-4xl mx-auto">
+        <TabsList className="grid w-full grid-cols-2 bg-card/60 backdrop-blur-xl border-white/20 shadow-inner h-auto rounded-lg p-0">
+            <TabsTrigger value="profile" className="py-3 data-[state=active]:bg-black/20 data-[state=active]:text-white rounded-l-lg">
+                <User className="mr-2 h-5 w-5" /> Profile
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="py-3 data-[state=active]:bg-black/20 data-[state=active]:text-white rounded-r-lg">
+                <ShoppingCart className="mr-2 h-5 w-5" /> My Orders
+            </TabsTrigger>
+        </TabsList>
+        <TabsContent value="profile">
+            <Card className="w-full bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl mt-4">
+              <CardHeader className="text-center items-center">
+                 <div className="relative">
+                    <Avatar className="h-24 w-24 border-2 border-primary">
+                        <AvatarImage src={user.photoURL || undefined} alt={user.displayName || "User"} />
+                        <AvatarFallback>
+                            <User className="h-10 w-10" />
+                        </AvatarFallback>
+                    </Avatar>
+                    <Label htmlFor="avatar-upload" className="absolute -bottom-2 -right-2 cursor-pointer bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors">
+                       {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Edit className="h-5 w-5" />}
+                    </Label>
+                    <Input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={isUploading} />
+                 </div>
 
-            <CardTitle className="font-headline text-3xl pt-4">{user.displayName || 'Welcome'}</CardTitle>
-            <CardDescription className="text-slate-300">
-              {user.email}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <Button onClick={handleSignOut} className="w-full h-12 text-lg">Sign Out</Button>
-          </CardContent>
-        </Card>
-      </div>
+                <CardTitle className="font-headline text-3xl pt-4">{user.displayName || 'Welcome'}</CardTitle>
+                <CardDescription className="text-slate-300">
+                  {user.email}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <Button onClick={handleSignOut} className="w-full h-12 text-lg">Sign Out</Button>
+              </CardContent>
+            </Card>
+        </TabsContent>
+        <TabsContent value="orders">
+             <OrderHistory />
+        </TabsContent>
+     </Tabs>
     );
   }
 
