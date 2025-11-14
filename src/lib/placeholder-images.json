@@ -1,3 +1,70 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "kente-stole-1",
+      "description": "A vibrant yellow Kente stole.",
+      "imageUrl": "https://images.unsplash.com/photo-1644845933242-cb40a29c9059?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxrZW50ZSUyMHN0b2xlfGVufDB8fHx8MTc2MzA4OTA3Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kente stole"
+    },
+    {
+      "id": "kente-stole-2",
+      "description": "A detailed red and green Kente stole.",
+      "imageUrl": "https://images.unsplash.com/photo-1726273858078-cb94feb4cf53?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxnaGFuYSUyMGZhYnJpY3xlbnwwfHx8fDE3NjMwODkwNzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ghana fabric"
+    },
+    {
+      "id": "full-cloth-1",
+      "description": "A large, intricate Kente cloth.",
+      "imageUrl": "https://images.unsplash.com/photo-1612353375223-e6acfa31ae71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwdGV4dGlsZXxlbnwwfHx8fDE3NjMwODkwNzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "african textile"
+    },
+    {
+      "id": "full-cloth-2",
+      "description": "A beautiful blue and gold Kente cloth.",
+      "imageUrl": "https://images.unsplash.com/photo-1761515315519-7fa1af1d3e06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxrZW50ZSUyMHBhdHRlcm58ZW58MHx8fHwxNzYyOTg5MTU2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kente pattern"
+    },
+    {
+      "id": "accessory-bow-tie",
+      "description": "A stylish Kente bow tie.",
+      "imageUrl": "https://images.unsplash.com/photo-1666357702631-48dcc06ec849?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxrZW50ZSUyMGJvdyUyMHRpZXxlbnwwfHx8fDE3NjMwODkwNzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kente bow tie"
+    },
+    {
+      "id": "accessory-fan",
+      "description": "A handcrafted Kente fan.",
+      "imageUrl": "https://images.unsplash.com/photo-1647316897340-6b6de5597c0f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwZmFufGVufDB8fHx8MTc2MzA4OTA3Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "african fan"
+    },
+    {
+      "id": "ready-to-wear-dress",
+      "description": "A modern dress made with Kente fabric.",
+      "imageUrl": "https://images.unsplash.com/photo-1741885178424-f6959f813aa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwZHJlc3N8ZW58MHx8fHwxNzYzMDg5MDczfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "african dress"
+    },
+    {
+      "id": "ready-to-wear-shirt",
+      "description": "A fashionable men's shirt with Kente accents.",
+      "imageUrl": "https://images.unsplash.com/photo-1761660896769-1adb3a79a5f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxhZnJpY2FuJTIwc2hpcnR8ZW58MHx8fHwxNzYzMDg5MDcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "african shirt"
+    },
+    {
+      "id": "hero-image",
+      "description": "A stunning display of various Kente cloths.",
+      "imageUrl": "https://images.unsplash.com/photo-1660695828403-b42e117e0b4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxrZW50ZSUyMGNsb3RofGVufDB8fHx8MTc2MzA4OTA3M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kente cloth"
+    },
+    {
+      "id": "about-us-image",
+      "description": "A Ghanaian weaver at a loom.",
+      "imageUrl": "https://images.unsplash.com/photo-1595596690427-e8ffe1617b1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxnaGFuYSUyMHdlYXZlcnxlbnwwfHx8fDE3NjMwODkwNzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ghana weaver"
+    },
+    {
+      "id": "kente-guide-image",
+      "description": "Close-up of a Kente pattern.",
+      "imageUrl": "https://picsum.photos/seed/kente-guide/1200/800",
+      "imageHint": "kente detail"
+    }
+  ]
 }
