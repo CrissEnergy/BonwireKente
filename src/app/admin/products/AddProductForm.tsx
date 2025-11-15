@@ -231,7 +231,7 @@ export function AddProductForm({ product }: AddProductFormProps) {
 
             <div>
               <FormLabel>Prices</FormLabel>
-              <div className="grid md:grid-cols-3 gap-8 mt-2">
+              <div className="grid sm:grid-cols-3 gap-4 md:gap-8 mt-2">
                  <FormField control={form.control} name="price.usd" render={({ field }) => (
                       <FormItem><FormLabel>Price (USD)</FormLabel><FormControl><Input type="number" placeholder="e.g., 75.00" {...field} /></FormControl><FormMessage /></FormItem>
                   )}/>
@@ -284,7 +284,7 @@ export function AddProductForm({ product }: AddProductFormProps) {
              </div>
 
             {imageSource && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   <div className="relative group">
                     <div
                         className="relative aspect-square rounded-lg overflow-hidden border-4 border-primary w-full"
@@ -307,7 +307,7 @@ export function AddProductForm({ product }: AddProductFormProps) {
             <FormField control={form.control} name="tags" render={() => (
                 <FormItem>
                   <div className="mb-4"><FormLabel className="text-base">Tags</FormLabel><FormDescription>Select all relevant tags for this product.</FormDescription></div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {availableTags.map((item) => (
                       <FormField key={item} control={form.control} name="tags" render={({ field }) => (
                             <FormItem key={item} className="flex flex-row items-start space-x-3 space-y-0">

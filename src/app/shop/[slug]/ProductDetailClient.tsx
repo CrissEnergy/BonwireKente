@@ -63,7 +63,7 @@ export function ProductDetailClient() {
         )}
         <div className="absolute inset-0 bg-black/30" />
         <div className="relative z-10 container py-12 md:py-24 flex items-center justify-center">
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl w-full">
+            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-6xl w-full">
                 <Card className="overflow-hidden group bg-card/60 backdrop-blur-sm border-white/20">
                     <CardContent className="p-0">
                         <div className="aspect-w-1 aspect-h-1 relative">
@@ -93,7 +93,7 @@ export function ProductDetailClient() {
 
                         <p className="text-slate-300 leading-relaxed">{product.description}</p>
                         
-                        <div className="flex items-center gap-4 pt-4">
+                        <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
                             <AddToCartButton product={product} />
                             <WishlistButton product={product} />
                         </div>

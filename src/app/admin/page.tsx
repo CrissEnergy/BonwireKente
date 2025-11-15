@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
     <div className="space-y-8">
       <h1 className="text-4xl font-bold font-headline text-white">Dashboard</h1>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => (
           <Card key={stat.title} className="bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl text-white">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -55,7 +55,7 @@ export default function AdminDashboardPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               ) : (
                 <>
-                  <div className="text-3xl font-bold">{stat.value}</div>
+                  <div className="text-2xl sm:text-3xl font-bold">{stat.value}</div>
                   <p className="text-xs text-slate-300">{stat.description}</p>
                 </>
               )}

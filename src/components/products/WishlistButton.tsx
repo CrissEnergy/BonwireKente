@@ -25,7 +25,7 @@ export function WishlistButton({ product }: { product: Product }) {
     <Button
       variant="outline"
       size="icon"
-      className="h-12 w-12"
+      className="h-12 w-12 flex-shrink-0"
       onClick={handleToggleWishlist}
       aria-label={productInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
     >

@@ -19,8 +19,8 @@ export function AddToCartButton({ product }: { product: Product }) {
   };
 
   return (
-    <Button size="lg" className="h-12 flex-grow" onClick={handleAddToCart}>
-      <ShoppingCart className="mr-2 h-5 w-5" /> Weave This Heritage Into Your Wardrobe
+    <Button size="lg" className="h-12 w-full" onClick={handleAddToCart}>
+      <ShoppingCart className="mr-2 h-5 w-5" /> Weave Into Wardrobe
     </Button>
   );
 }

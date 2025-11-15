@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Heart, User, Search, ChevronDown, Menu, LogOut, LogIn, Shield } from 'lucide-react';
+import { ShoppingCart, Heart, User, Search, ChevronDown, Menu, LogOut, LogIn } from 'lucide-react';
 import { KentePatternIcon } from '@/components/icons/KentePatternIcon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
@@ -61,6 +61,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg">
       <div className="container flex h-16 items-center">
+        {/* Desktop Nav */}
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <KentePatternIcon className="h-8 w-8" />
@@ -75,8 +76,8 @@ export function Header() {
           </nav>
         </div>
 
-        {/* Mobile Nav */}
-        <div className="md:hidden">
+        {/* Mobile Nav & Layout */}
+        <div className="flex w-full items-center justify-between md:hidden">
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -87,10 +88,12 @@ export function Header() {
             <SheetContent side="left" className="bg-background/80 backdrop-blur-lg">
               <SheetHeader className="border-b pb-4 mb-4">
                   <SheetTitle>
-                    <Link href="/" className="mr-6 flex items-center space-x-2">
-                      <KentePatternIcon className="h-8 w-8" />
-                      <span className="font-bold font-headline text-2xl">BonwireKente</span>
-                    </Link>
+                    <SheetClose asChild>
+                        <Link href="/" className="mr-6 flex items-center space-x-2">
+                            <KentePatternIcon className="h-8 w-8" />
+                            <span className="font-bold font-headline text-2xl">BonwireKente</span>
+                        </Link>
+                    </SheetClose>
                   </SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col space-y-2">
@@ -103,26 +106,21 @@ export function Header() {
                     </SheetClose>
                   </Fragment>
                 ))}
-                 <SheetClose asChild>
-                      <Link href="/admin" className="text-lg transition-colors hover:text-primary p-2 rounded-md flex items-center">
-                        <Shield className="mr-2 h-5 w-5" /> Admin
-                      </Link>
-                  </SheetClose>
               </nav>
             </SheetContent>
           </Sheet>
-        </div>
-        
-        {/* Mobile Logo */}
-        <div className="flex md:hidden justify-center flex-1">
-             <Link href="/" className="flex items-center space-x-2">
-                <KentePatternIcon className="h-8 w-8" />
-                <span className="font-bold font-headline text-xl">BonwireKente</span>
-              </Link>
+          
+          <Link href="/" className="flex items-center space-x-2">
+            <KentePatternIcon className="h-8 w-8" />
+            <span className="font-bold font-headline text-xl">BonwireKente</span>
+          </Link>
+          
+          {/* Dummy div to balance the flex container */}
+          <div className="w-8"></div>
         </div>
 
 
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-end space-x-1 sm:space-x-2">
          <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
