@@ -7,20 +7,13 @@ service cloud.firestore {
     // --- Public Collections ---
 
     /**
-     * @description Public read access for the entire 'products' collection.
+     * @description Public read access for the 'products' collection.
      * @path /products
-     * @allow (list, get) Public read access.
-     */
-    match /products/{document=**} {
-      allow read: if true;
-    }
-
-    /**
-     * @description Write access for the 'products' collection.
-     * @path /products/{productId}
-     * @allow (create, update, delete) Restricted to authenticated users.
+     * @allow (list, get) Public read access for all users.
      */
     match /products/{productId} {
+      allow get: if true;
+      allow list: if true;
       allow write: if isSignedIn();
     }
 
