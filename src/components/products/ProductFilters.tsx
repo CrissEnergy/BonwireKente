@@ -6,6 +6,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
+import { useAppContext } from '@/context/AppContext';
+import { CURRENCIES, Currency } from '@/lib/types';
+import { useEffect, useMemo } from 'react';
 
 const availableOccasions = ['Traditional', 'Wedding', 'Festival', 'Naming Ceremony', 'Everyday'];
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'];
@@ -24,7 +27,25 @@ interface ProductFiltersProps {
     setFilters: React.Dispatch<React.SetStateAction<Filters>>;
 }
 
+const currencySettings = {
+    USD: { max: 500, step: 10 },
+    GHS: { max: 8000, step: 100 },
+    EUR: { max: 500, step: 10 },
+};
+
 export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
+    const { currency } = useAppContext();
+    const { max, step } = currencySettings[currency];
+    const currencySymbol = CURRENCIES[currency].symbol;
+
+    useEffect(() => {
+        // Reset price range when currency changes
+        setFilters(prev => ({
+            ...prev,
+            priceRange: [0, max]
+        }));
+    }, [currency, max, setFilters]);
+
 
     const handleCheckboxChange = (filterType: 'categories' | 'audience' | 'occasions' | 'tags', value: string) => {
         setFilters(prev => {
@@ -49,14 +70,15 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
                 <div>
                     <h4 className="font-semibold mb-4">Price Range</h4>
                     <Slider
-                        defaultValue={[0, 500]}
-                        max={500}
-                        step={10}
+                        key={currency} // Use key to force re-render on currency change
+                        defaultValue={[0, max]}
+                        max={max}
+                        step={step}
                         onValueCommit={handlePriceChange}
                     />
                     <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                        <span>${filters.priceRange[0]}</span>
-                        <span>${filters.priceRange[1]}</span>
+                        <span>{currencySymbol}{filters.priceRange[0]}</span>
+                        <span>{currencySymbol}{filters.priceRange[1]}</span>
                     </div>
                 </div>
 
