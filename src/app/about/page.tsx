@@ -11,6 +11,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel"
+import { KentePatternIcon } from '@/components/icons/KentePatternIcon';
 
 export default function AboutPage() {
     const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
@@ -40,6 +41,9 @@ export default function AboutPage() {
             <div className="relative z-10">
                 <div className="container py-16 md:py-24">
                     <div className="text-center max-w-3xl mx-auto text-white">
+                        <div className="flex justify-center mb-4">
+                            <KentePatternIcon className="h-16 w-16 text-primary" />
+                        </div>
                         <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4">Our Story</h1>
                         <p className="text-lg text-slate-200">
                             BonwireKente was born from a passion for preserving and sharing the rich cultural tapestry of Ghana. We are more than just a brand; we are storytellers, artisans, and custodians of a vibrant heritage.
