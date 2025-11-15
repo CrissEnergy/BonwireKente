@@ -45,7 +45,7 @@ export default function AdminLoginPage() {
         </div>
         <CardTitle className="font-headline text-3xl">Admin Login</CardTitle>
         <CardDescription className="text-slate-300">
-          Please enter the admin phone number to continue.
+          Please enter the magic login to continue.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -54,7 +54,7 @@ export default function AdminLoginPage() {
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="tel"
-              placeholder="Admin Phone Number"
+              placeholder="Magic login"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               className="pl-10 h-12 text-lg"
