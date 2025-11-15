@@ -3,16 +3,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Allow public read access to the products collection and its documents.
-    // Restrict write access to authenticated users only.
+    // Allow public read (get, list) access to the products collection,
+    // but restrict all write (create, update, delete) access to signed-in users.
+    // This is the definitive rule to allow visitors to browse products.
     match /products/{productId} {
-      allow get: if true;
+      allow read: if true;
       allow write: if isSignedIn();
-    }
-    
-    // This rule is necessary to allow collection queries (listing products)
-    match /products {
-      allow list: if true;
     }
 
     /**
