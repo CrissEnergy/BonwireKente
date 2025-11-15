@@ -42,7 +42,7 @@ export default function AboutPage() {
                 <div className="container py-16 md:py-24">
                     <div className="text-center max-w-3xl mx-auto text-white">
                         <div className="flex justify-center mb-4">
-                            <KentePatternIcon className="h-16 w-16 text-primary" />
+                            <KentePatternIcon className="h-16 w-16 text-white" />
                         </div>
                         <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4">Our Story</h1>
                         <p className="text-lg text-slate-200">
