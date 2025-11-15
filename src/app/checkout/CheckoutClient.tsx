@@ -23,10 +23,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ghanaRegions } from '@/lib/ghana-regions';
 import { usePaystackPayment } from 'react-paystack';
 import type { PaystackProps } from 'react-paystack/dist/types';
+import { cn } from '@/lib/utils';
 
 type FormData = { [k: string]: string };
 
-const PaystackButton = ({ config, onSuccess, onClose, children }: { config: PaystackProps, onSuccess: (ref: any) => void, onClose: () => void, children: React.ReactNode }) => {
+const PaystackButton = ({ config, onSuccess, onClose, children, disabled }: { config: PaystackProps, onSuccess: (ref: any) => void, onClose: () => void, children: React.ReactNode, disabled?: boolean }) => {
     const initializePayment = usePaystackPayment(config);
 
     return (
@@ -35,6 +36,7 @@ const PaystackButton = ({ config, onSuccess, onClose, children }: { config: Pays
             size="lg"
             className="w-full"
             onClick={() => initializePayment({onSuccess, onClose})}
+            disabled={disabled}
         >
             {children}
         </Button>
@@ -111,7 +113,7 @@ export function CheckoutClient() {
         });
   }
   
-  const handlePlaceOrder = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handlePlaceOrder = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     if (!formRef.current?.checkValidity()) {
         formRef.current?.reportValidity();
@@ -159,11 +161,16 @@ export function CheckoutClient() {
   };
 
   const onPaystackSuccess = (reference: any) => {
+    if (!formRef.current) return;
+    const formEl = formRef.current;
+    const formEntries = new FormData(formEl);
+    const currentFormProps = Object.fromEntries(formEntries.entries()) as FormData;
+
     toast({
         title: "Payment Successful!",
         description: `Your payment was successful. Ref: ${reference.reference}`,
     });
-    createOrderInFirestore(formProps, reference.reference);
+    createOrderInFirestore(currentFormProps, reference.reference);
   };
 
   const onPaystackClose = () => {
@@ -254,23 +261,48 @@ export function CheckoutClient() {
                 )}
                 </div>
                 <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Payment Method</h3>
-                <RadioGroup name="paymentMethod" defaultValue={paymentMethod} onValueChange={setPaymentMethod} className="space-y-2">
-                    <div className="flex items-center space-x-2 rounded-md border border-white/20 p-3 bg-white/10">
-                    <RadioGroupItem value="stripe" id="stripe" />
-                    <Label htmlFor="stripe">Credit Card (Stripe)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2 rounded-md border border-white/20 p-3 bg-white/10">
-                    <RadioGroupItem value="paypal" id="paypal" />
-                    <Label htmlFor="paypal">PayPal</Label>
-                    </div>
-                    {currency === 'GHS' && (
-                        <div className="flex items-center space-x-2 rounded-md border border-white/20 p-3 bg-white/10">
-                            <RadioGroupItem value="mobile-money" id="mobile-money" />
-                            <Label htmlFor="mobile-money">Mobile Money (Ghana)</Label>
-                        </div>
-                    )}
-                </RadioGroup>
+                    <h3 className="text-lg font-semibold">Payment Method</h3>
+                    <RadioGroup name="paymentMethod" defaultValue={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
+                        <Label htmlFor="stripe" className={cn("flex flex-col gap-4 rounded-md border p-4 cursor-pointer hover:bg-white/10", { "bg-white/10 border-primary": paymentMethod === 'stripe' })}>
+                            <div className="flex items-center space-x-3">
+                                <RadioGroupItem value="stripe" id="stripe" />
+                                <span className="font-semibold">Credit / Debit Card</span>
+                            </div>
+                            <div className="relative h-8 ml-8">
+                                <Image src="https://www.nicepng.com/png/detail/392-3926074_credit-or-debit-card-visa-mastercard-logo-hd.png" alt="Credit/Debit Card Logos" fill style={{objectFit: 'contain', objectPosition: 'left'}}/>
+                            </div>
+                        </Label>
+
+                        <Label htmlFor="paypal" className={cn("flex flex-col gap-4 rounded-md border p-4 cursor-pointer hover:bg-white/10", { "bg-white/10 border-primary": paymentMethod === 'paypal' })}>
+                            <div className="flex items-center space-x-3">
+                                <RadioGroupItem value="paypal" id="paypal" />
+                                <span className="font-semibold">PayPal</span>
+                            </div>
+                            <div className="relative h-8 ml-8">
+                                <Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/2560px-PayPal.svg.png" alt="PayPal Logo" fill style={{objectFit: 'contain', objectPosition: 'left'}}/>
+                            </div>
+                        </Label>
+
+                        {currency === 'GHS' && (
+                             <Label htmlFor="mobile-money" className={cn("flex flex-col gap-4 rounded-md border p-4 cursor-pointer hover:bg-white/10", { "bg-white/10 border-primary": paymentMethod === 'mobile-money' })}>
+                                <div className="flex items-center space-x-3">
+                                    <RadioGroupItem value="mobile-money" id="mobile-money" />
+                                    <span className="font-semibold">Mobile Money (Ghana)</span>
+                                </div>
+                                <div className="ml-8 flex items-center gap-4 h-8">
+                                    <div className="relative h-full w-12">
+                                         <Image src="https://logos-world.net/wp-content/uploads/2023/01/MTN-Logo.png" alt="MTN Mobile Money" fill style={{objectFit: 'contain'}} />
+                                    </div>
+                                    <div className="relative h-full w-12">
+                                        <Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBqVJfDFa4vBi7pEoNiqDTPqD3uZmSqL24XA&s" alt="Telecel Cash" fill style={{objectFit: 'contain'}} />
+                                    </div>
+                                    <div className="relative h-full w-12">
+                                        <Image src="https://amaghanaonline.com/wp-content/uploads/2022/07/WhatsApp-Image-2022-07-27-at-5.16.26-PM.jpeg" alt="AirtelTigo Money" fill style={{objectFit: 'contain'}} />
+                                    </div>
+                                </div>
+                            </Label>
+                        )}
+                    </RadioGroup>
                 </div>
             </CardContent>
         </Card>
@@ -312,7 +344,7 @@ export function CheckoutClient() {
             </CardContent>
             </Card>
              {paymentMethod === 'mobile-money' ? (
-                <PaystackButton config={paystackConfig} onSuccess={onPaystackSuccess} onClose={onPaystackClose}>
+                <PaystackButton config={paystackConfig} onSuccess={onPaystackSuccess} onClose={onPaystackClose} disabled={isPlacingOrder}>
                     {isPlacingOrder ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     Pay {currencySymbol}{total.toFixed(2)}
                 </PaystackButton>
