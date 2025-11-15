@@ -1,11 +1,10 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Allow public read access (get, list) to the products collection.
-    // Restrict write access (create, update, delete) to signed-in users.
+    // Allow public read access to the products collection.
+    // Restrict write access to authenticated users.
     match /products/{productId} {
       allow read: if true;
       allow write: if isSignedIn();
