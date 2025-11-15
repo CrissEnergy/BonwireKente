@@ -11,9 +11,11 @@ service cloud.firestore {
      * @path /products
      * @allow (list, get) Public read access for all users.
      */
+    match /products/{document=**} {
+      allow read: if true;
+    }
+    
     match /products/{productId} {
-      allow get: if true;
-      allow list: if true;
       allow write: if isSignedIn();
     }
 
