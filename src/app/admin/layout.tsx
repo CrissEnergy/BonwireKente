@@ -9,7 +9,7 @@ import { useUser } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
-const ADMIN_EMAIL = 'admin@bonwirekente.com';
+const ADMIN_PHONE_NUMBER = '+233596352632';
 
 export default function AdminLayout({
   children,
@@ -25,27 +25,19 @@ export default function AdminLayout({
       return; // Wait until the user's auth state is loaded
     }
 
-    const isLoginPage = pathname === '/admin/login';
-
     if (!user) {
-      // If not logged in and not on the login page, redirect to login
-      if (!isLoginPage) {
-        router.replace('/admin/login');
-      }
+      // If not logged in, redirect to the main account page to log in
+      router.replace('/account');
       return;
     }
 
-    // User is logged in, check if they are the admin
-    if (user.email?.toLowerCase() !== ADMIN_EMAIL) {
+    // User is logged in, check if they are the admin by phone number
+    if (user.phoneNumber !== ADMIN_PHONE_NUMBER) {
       // If not the admin, redirect to the main site
       router.replace('/');
       return;
     }
-
-    // If the admin is logged in and on the login page, redirect to the dashboard
-    if (isLoginPage) {
-      router.replace('/admin');
-    }
+    
   }, [user, isUserLoading, router, pathname]);
 
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
@@ -55,7 +47,8 @@ export default function AdminLayout({
     { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   ];
 
-  const isLoadingScreen = isUserLoading || (!user && pathname !== '/admin/login');
+  // Show a loading screen while verifying user or if user is not the admin yet
+  const isLoadingScreen = isUserLoading || !user || user.phoneNumber !== ADMIN_PHONE_NUMBER;
 
   if (isLoadingScreen) {
     return (
@@ -77,13 +70,8 @@ export default function AdminLayout({
       </div>
     );
   }
-
-  // If on the login page (and not loading), render only the children (the login form)
-  if (pathname === '/admin/login') {
-    return <>{children}</>;
-  }
   
-  // If we are here, it means user is the authenticated admin and not on the login page
+  // If we are here, it means user is the authenticated admin
   return (
     <div className="relative min-h-[calc(100vh-4rem)] w-full animate-fade-in-up">
       {heroImage && (
