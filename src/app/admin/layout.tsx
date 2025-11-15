@@ -26,8 +26,8 @@ export default function AdminLayout({
     }
 
     if (!user) {
-      // If not logged in, redirect to the main account page to log in
-      router.replace('/account');
+      // If not logged in, redirect to the admin login page
+      router.replace('/admin/login');
       return;
     }
 
@@ -50,7 +50,7 @@ export default function AdminLayout({
   // Show a loading screen while verifying user or if user is not the admin yet
   const isLoadingScreen = isUserLoading || !user || user.phoneNumber !== ADMIN_PHONE_NUMBER;
 
-  if (isLoadingScreen) {
+  if (isLoadingScreen && pathname !== '/admin/login') {
     return (
       <div className="relative min-h-[calc(100vh-4rem)] w-full flex items-center justify-center">
         {heroImage && (
@@ -71,7 +71,27 @@ export default function AdminLayout({
     );
   }
   
-  // If we are here, it means user is the authenticated admin
+  // If we are here, it means user is the authenticated admin or is on the login page
+  if (pathname === '/admin/login') {
+      return (
+           <div className="relative min-h-[calc(100vh-4rem)] w-full flex items-center justify-center">
+                {heroImage && (
+                <Image
+                    src={heroImage.imageUrl}
+                    alt={heroImage.description}
+                    fill
+                    className="object-cover blur-md scale-110"
+                    data-ai-hint={heroImage.imageHint}
+                />
+                )}
+                <div className="absolute inset-0 bg-black/60" />
+                <div className="relative z-10 w-full max-w-md">
+                     {children}
+                </div>
+           </div>
+      )
+  }
+
   return (
     <div className="relative min-h-[calc(100vh-4rem)] w-full animate-fade-in-up">
       {heroImage && (
