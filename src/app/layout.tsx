@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase';
+import { AdminAuthProvider } from './admin/AdminAuthProvider';
 
 export const metadata: Metadata = {
   title: 'BonwireKente - Wear Your Heritage',
@@ -33,12 +34,14 @@ export default function RootLayout({
         >
           <FirebaseClientProvider>
             <AppProvider>
-              <div className="flex min-h-screen flex-col">
-                <Header />
-                <main className="flex-grow">{children}</main>
-                <Footer />
-              </div>
-              <Toaster />
+              <AdminAuthProvider>
+                <div className="flex min-h-screen flex-col">
+                  <Header />
+                  <main className="flex-grow">{children}</main>
+                  <Footer />
+                </div>
+                <Toaster />
+              </AdminAuthProvider>
             </AppProvider>
           </FirebaseClientProvider>
         </ThemeProvider>

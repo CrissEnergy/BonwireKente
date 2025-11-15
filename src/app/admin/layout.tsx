@@ -7,38 +7,28 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Home, Package, ShoppingCart, Users, Shield, Loader2 } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useAdminAuth } from './AdminAuthProvider';
 
-const ADMIN_PHONE_NUMBER = '+233596352632';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isUserLoading } = useUser();
+  const { isAdmin, isLoading } = useAdminAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (isUserLoading) {
-      return; // Wait until the user's auth state is loaded
+    if (isLoading) {
+      return; 
     }
 
-    if (!user) {
-      // If not logged in, redirect to the admin login page
+    if (!isAdmin && pathname !== '/admin/login') {
       router.replace('/admin/login');
-      return;
     }
-
-    // User is logged in, check if they are the admin by phone number
-    if (user.phoneNumber !== ADMIN_PHONE_NUMBER) {
-      // If not the admin, redirect to the main site
-      router.replace('/');
-      return;
-    }
-    
-  }, [user, isUserLoading, router, pathname]);
+  }, [isAdmin, isLoading, router, pathname]);
 
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
   const navItems = [
@@ -47,10 +37,9 @@ export default function AdminLayout({
     { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   ];
 
-  // Show a loading screen while verifying user or if user is not the admin yet
-  const isLoadingScreen = isUserLoading || !user || user.phoneNumber !== ADMIN_PHONE_NUMBER;
+  const showLoadingScreen = isLoading && pathname !== '/admin/login';
 
-  if (isLoadingScreen && pathname !== '/admin/login') {
+  if (showLoadingScreen) {
     return (
       <div className="relative min-h-[calc(100vh-4rem)] w-full flex items-center justify-center">
         {heroImage && (
@@ -65,14 +54,13 @@ export default function AdminLayout({
         <div className="absolute inset-0 bg-black/60" />
         <div className="relative z-10 text-center text-white">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-          <p className="mt-4 text-lg">Verifying credentials...</p>
+          <p className="mt-4 text-lg">Verifying access...</p>
         </div>
       </div>
     );
   }
   
-  // If we are here, it means user is the authenticated admin or is on the login page
-  if (pathname === '/admin/login') {
+  if (!isAdmin) {
       return (
            <div className="relative min-h-[calc(100vh-4rem)] w-full flex items-center justify-center">
                 {heroImage && (
@@ -130,3 +118,4 @@ export default function AdminLayout({
     </div>
   );
 }
+

@@ -7,126 +7,65 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/firebase';
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
-import OtpInput from 'react-otp-input';
-import { Loader2, ShieldCheck } from 'lucide-react';
+import { Loader2, ShieldCheck, Phone } from 'lucide-react';
+import { useAdminAuth } from '../AdminAuthProvider';
 
-const ADMIN_PHONE_NUMBER = '+233596352632';
+const ADMIN_PHONE_NUMBER = '0596352632';
 
 export default function AdminLoginPage() {
-  const [otp, setOtp] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showOTP, setShowOTP] = useState(false);
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-
-  const { toast } = useToast();
-  const auth = useAuth();
+  const { login } = useAdminAuth();
   const router = useRouter();
+  const { toast } = useToast();
 
-  const setupRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => {},
-      });
-    }
-  };
-
-  const onSignInSubmit = (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setupRecaptcha();
 
-    const appVerifier = window.recaptchaVerifier;
-    signInWithPhoneNumber(auth, ADMIN_PHONE_NUMBER, appVerifier)
-      .then((result) => {
-        setConfirmationResult(result);
-        setLoading(false);
-        setShowOTP(true);
-        toast({ title: 'OTP Sent', description: 'Please check your phone for the verification code.' });
-      })
-      .catch((error) => {
-        console.error('SMS not sent error', error);
-        toast({
-          variant: 'destructive',
-          title: 'Failed to Send OTP',
-          description: 'There was an error sending the verification code. Please try again.',
-        });
-        setLoading(false);
+    if (phoneNumber === ADMIN_PHONE_NUMBER) {
+      toast({ title: 'Success', description: 'Admin login successful.' });
+      login();
+      router.push('/admin');
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: 'The phone number is incorrect.',
       });
-  };
-
-  const onOTPVerify = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    if (!confirmationResult) {
       setLoading(false);
-      return;
     }
-
-    confirmationResult.confirm(otp)
-      .then(async (result) => {
-        setLoading(false);
-        toast({ title: 'Success', description: 'Admin verification successful.' });
-        router.push('/admin');
-      })
-      .catch((error) => {
-        console.error('OTP verification error', error);
-        toast({
-          variant: 'destructive',
-          title: 'OTP Verification Failed',
-          description: 'The code you entered is incorrect. Please try again.',
-        });
-        setLoading(false);
-      });
   };
 
   return (
     <Card className="w-full bg-card/70 backdrop-blur-xl border-white/20 shadow-2xl text-white">
-      <div id="recaptcha-container"></div>
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
-            <ShieldCheck className="h-12 w-12 text-primary" />
+          <ShieldCheck className="h-12 w-12 text-primary" />
         </div>
-        <CardTitle className="font-headline text-3xl">Admin Verification</CardTitle>
+        <CardTitle className="font-headline text-3xl">Admin Login</CardTitle>
         <CardDescription className="text-slate-300">
-            {showOTP ? 'Enter the code sent to your phone.' : 'A security code will be sent to the registered admin phone number.'}
+          Please enter the admin phone number to continue.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {!showOTP ? (
-          <form onSubmit={onSignInSubmit}>
-            <Button type="submit" className="w-full h-12 text-lg" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Send Verification Code
-            </Button>
-          </form>
-        ) : (
-          <form onSubmit={onOTPVerify} className="space-y-6">
-            <OtpInput
-              value={otp}
-              onChange={setOtp}
-              numInputs={6}
-              renderSeparator={<span className="mx-1">-</span>}
-              renderInput={(props) => <Input {...props} />}
-              containerStyle="flex justify-center"
-              inputStyle="!w-12 h-12 text-lg text-center"
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              type="tel"
+              placeholder="Admin Phone Number"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="pl-10 h-12 text-lg"
+              required
             />
-            <Button type="submit" className="w-full h-12 text-lg" disabled={loading || otp.length < 6}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Verify & Sign In
-            </Button>
-          </form>
-        )}
+          </div>
+          <Button type="submit" className="w-full h-12 text-lg" disabled={loading}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Login'}
+          </Button>
+        </form>
       </CardContent>
     </Card>
   );
-}
-
-// Extend the Window interface to include the recaptcha verifier
-declare global {
-    interface Window {
-        recaptchaVerifier: RecaptchaVerifier;
-    }
 }
