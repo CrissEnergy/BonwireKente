@@ -20,6 +20,8 @@ import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import type { Order } from '@/lib/types';
 import { CURRENCIES } from '@/lib/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ghanaRegions } from '@/lib/ghana-regions';
 
 
 export function CheckoutClient() {
@@ -29,6 +31,8 @@ export function CheckoutClient() {
   const { toast } = useToast();
   const router = useRouter();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState('');
+
 
   const subtotal = cart.reduce((sum, item) => sum + item.price[currency.toLowerCase() as keyof typeof item.price] * item.quantity, 0);
   const total = subtotal; // Shipping is free for now
@@ -40,13 +44,23 @@ export function CheckoutClient() {
 
     setIsPlacingOrder(true);
     
+    const formData = new FormData(event.currentTarget);
+    const formProps = Object.fromEntries(formData.entries());
+
+    let shippingAddress;
+    if (currency === 'GHS') {
+        shippingAddress = `${formProps.specificAddress}, ${formProps.city}, ${selectedRegion}, Ghana. Phone: ${formProps.phone}. Digital Address: ${formProps.digitalAddress || 'N/A'}`;
+    } else {
+        shippingAddress = `${formProps.address}, ${formProps.city}, ${formProps.country}. Postal: ${formProps['postal-code'] || 'N/A'}`;
+    }
+    
     const orderData: Omit<Order, 'id'> = {
         userId: user.uid,
         orderDate: new Date().toISOString(),
         totalAmount: total,
         currency: currency, // Save the currency with the order
-        shippingAddress: "123 Heritage Lane, Accra, Ghana", // Placeholder
-        paymentMethod: "Stripe", // Placeholder
+        shippingAddress, // Use the constructed address
+        paymentMethod: formProps.paymentMethod as string,
         status: 'Pending',
         items: cart.map(item => ({
             id: item.id,
@@ -121,37 +135,74 @@ export function CheckoutClient() {
                 <h3 className="text-lg font-semibold">Contact Information</h3>
                 <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" type="email" placeholder="you@example.com" defaultValue={user?.email || ''} required/>
+                    <Input id="email" name="email" type="email" placeholder="you@example.com" defaultValue={user?.email || ''} required/>
                 </div>
                 </div>
                 <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Shipping Address</h3>
                 <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" placeholder="Your Name" defaultValue={user?.displayName || ''} required />
+                    <Input id="name" name="name" placeholder="Your Name" defaultValue={user?.displayName || ''} required />
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="address">Address</Label>
-                    <Input id="address" placeholder="123 Heritage Lane" required />
-                </div>
-                <div className="grid sm:grid-cols-2 gap-4">
+                
+                {currency === 'GHS' ? (
+                  <>
                     <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input id="city" placeholder="Accra" required />
+                        <Label htmlFor="phone">Phone Number</Label>
+                        <Input id="phone" name="phone" placeholder="e.g. 024 123 4567" required />
                     </div>
                     <div className="space-y-2">
-                    <Label htmlFor="postal-code">Postal Code</Label>
-                    <Input id="postal-code" placeholder="00233" />
+                        <Label htmlFor="region">Region</Label>
+                        <Select name="region" onValueChange={setSelectedRegion} required>
+                            <SelectTrigger id="region">
+                                <SelectValue placeholder="Select your region" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {ghanaRegions.map(region => (
+                                    <SelectItem key={region} value={region}>{region}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="country">Country</Label>
-                    <Input id="country" placeholder="Ghana" required />
+                    <div className="space-y-2">
+                        <Label htmlFor="city">City</Label>
+                        <Input id="city" name="city" placeholder="e.g. Accra" required />
                     </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="digitalAddress">Digital Address Code / Postal Code (Optional)</Label>
+                        <Input id="digitalAddress" name="digitalAddress" placeholder="e.g. GA-123-4567" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="specificAddress">Specific Location / Address</Label>
+                        <Input id="specificAddress" name="specificAddress" placeholder="e.g. House No. 123, Heritage Lane" required />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                        <Label htmlFor="address">Address</Label>
+                        <Input id="address" name="address" placeholder="123 Heritage Lane" required />
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                        <Label htmlFor="city">City</Label>
+                        <Input id="city" name="city" placeholder="New York" required />
+                        </div>
+                        <div className="space-y-2">
+                        <Label htmlFor="postal-code">Postal Code</Label>
+                        <Input id="postal-code" name="postal-code" placeholder="10001" />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="country">Country</Label>
+                        <Input id="country" name="country" placeholder="United States" required />
+                    </div>
+                  </>
+                )}
                 </div>
                 <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Payment Method</h3>
-                <RadioGroup defaultValue="stripe" className="space-y-2">
+                <RadioGroup name="paymentMethod" defaultValue="stripe" className="space-y-2">
                     <div className="flex items-center space-x-2 rounded-md border border-white/20 p-3 bg-white/10">
                     <RadioGroupItem value="stripe" id="stripe" />
                     <Label htmlFor="stripe">Credit Card (Stripe)</Label>
@@ -160,10 +211,12 @@ export function CheckoutClient() {
                     <RadioGroupItem value="paypal" id="paypal" />
                     <Label htmlFor="paypal">PayPal</Label>
                     </div>
-                    <div className="flex items-center space-x-2 rounded-md border border-white/20 p-3 bg-white/10">
-                    <RadioGroupItem value="mobile-money" id="mobile-money" />
-                    <Label htmlFor="mobile-money">Mobile Money (Ghana)</Label>
-                    </div>
+                    {currency === 'GHS' && (
+                        <div className="flex items-center space-x-2 rounded-md border border-white/20 p-3 bg-white/10">
+                            <RadioGroupItem value="mobile-money" id="mobile-money" />
+                            <Label htmlFor="mobile-money">Mobile Money (Ghana)</Label>
+                        </div>
+                    )}
                 </RadioGroup>
                 </div>
             </CardContent>
