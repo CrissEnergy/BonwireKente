@@ -29,8 +29,8 @@ interface ProductFiltersProps {
 
 const currencySettings = {
     USD: { max: 10000, step: 10 },
-    GHS: { max: 8000, step: 100 },
-    EUR: { max: 500, step: 10 },
+    GHS: { max: 150000, step: 100 },
+    EUR: { max: 9500, step: 10 },
 };
 
 export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
