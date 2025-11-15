@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Loader2, ShoppingCart } from 'lucide-react';
 import { useAuth, useFirestore } from '@/firebase';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { collection } from 'firebase/firestore';
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +26,22 @@ import type { PaystackProps } from 'react-paystack/dist/types';
 
 type FormData = { [k: string]: string };
 
+const PaystackButton = ({ config, onSuccess, onClose, children }: { config: PaystackProps, onSuccess: (ref: any) => void, onClose: () => void, children: React.ReactNode }) => {
+    const initializePayment = usePaystackPayment(config);
+
+    return (
+        <Button
+            type="button"
+            size="lg"
+            className="w-full"
+            onClick={() => initializePayment({onSuccess, onClose})}
+        >
+            {children}
+        </Button>
+    );
+};
+
+
 export function CheckoutClient() {
   const { cart, clearCart, currency } = useAppContext();
   const { user } = useAuth();
@@ -34,6 +50,9 @@ export function CheckoutClient() {
   const router = useRouter();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('stripe');
+  
+  const formRef = useRef<HTMLFormElement>(null);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price[currency.toLowerCase() as keyof typeof item.price] * item.quantity, 0);
   const total = subtotal; // Shipping is free for now
@@ -92,56 +111,23 @@ export function CheckoutClient() {
         });
   }
   
-  const handlePlaceOrder = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handlePlaceOrder = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
+    if (!formRef.current?.checkValidity()) {
+        formRef.current?.reportValidity();
+        return;
+    }
+    
     if (!user || cart.length === 0) return;
 
-    setIsPlacingOrder(true);
-    
-    const formEl = event.currentTarget;
-    const formEntries = new FormData(formEl);
-    const formProps = Object.fromEntries(formEntries.entries()) as FormData;
-
-    // This is the function that will be called on successful payment
-    const onSuccess = (reference: any) => {
-        toast({
-            title: "Payment Successful!",
-            description: `Your payment was successful. Ref: ${reference.reference}`,
-        });
-        createOrderInFirestore(formProps, reference.reference);
-    };
-
-    // This is the function that will be called when the payment modal is closed
-    const onClose = () => {
-        toast({
-            variant: "destructive",
-            title: "Payment Closed",
-            description: "You closed the payment popup. Your order was not placed.",
-        });
-        setIsPlacingOrder(false);
-    };
-
-    // Configuration for Paystack, now using `formProps` directly
-    const paystackConfig: PaystackProps = {
-        reference: new Date().getTime().toString(),
-        email: formProps.email || user?.email || '',
-        phone: formProps.phone || '',
-        amount: total * 100, // Paystack expects amount in lowest currency unit (pesewas for GHS)
-        publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
-        currency: 'GHS',
-    };
-    
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const initializePayment = usePaystackPayment(paystackConfig);
-
-    if (formProps.paymentMethod === 'mobile-money' && currency === 'GHS') {
-        initializePayment({onSuccess, onClose});
-    } else {
-        // For other payment methods, create order directly as "Pending"
+    if (paymentMethod !== 'mobile-money') {
+        const formEl = formRef.current;
+        const formEntries = new FormData(formEl);
+        const formProps = Object.fromEntries(formEntries.entries()) as FormData;
         createOrderInFirestore(formProps);
     }
+    // For 'mobile-money', clicking the PaystackButton will handle the rest.
   };
-
 
   if (cart.length === 0 && !isPlacingOrder) {
     return (
@@ -159,9 +145,39 @@ export function CheckoutClient() {
         </div>
     );
   }
+  
+  const formEntries = formRef.current ? new FormData(formRef.current) : new FormData();
+  const formProps = Object.fromEntries(formEntries.entries()) as FormData;
+
+  const paystackConfig: PaystackProps = {
+    reference: new Date().getTime().toString(),
+    email: formProps.email || user?.email || '',
+    phone: formProps.phone || '',
+    amount: total * 100,
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+    currency: 'GHS',
+  };
+
+  const onPaystackSuccess = (reference: any) => {
+    toast({
+        title: "Payment Successful!",
+        description: `Your payment was successful. Ref: ${reference.reference}`,
+    });
+    createOrderInFirestore(formProps, reference.reference);
+  };
+
+  const onPaystackClose = () => {
+    toast({
+        variant: "destructive",
+        title: "Payment Closed",
+        description: "You closed the payment popup. Your order was not placed.",
+    });
+    setIsPlacingOrder(false);
+  };
+
 
   return (
-    <form onSubmit={handlePlaceOrder}>
+    <form ref={formRef}>
         <div className="grid lg:grid-cols-2 gap-12 text-white">
         <Card className="bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
             <CardHeader>
@@ -239,7 +255,7 @@ export function CheckoutClient() {
                 </div>
                 <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Payment Method</h3>
-                <RadioGroup name="paymentMethod" defaultValue="stripe" className="space-y-2">
+                <RadioGroup name="paymentMethod" defaultValue={paymentMethod} onValueChange={setPaymentMethod} className="space-y-2">
                     <div className="flex items-center space-x-2 rounded-md border border-white/20 p-3 bg-white/10">
                     <RadioGroupItem value="stripe" id="stripe" />
                     <Label htmlFor="stripe">Credit Card (Stripe)</Label>
@@ -295,14 +311,19 @@ export function CheckoutClient() {
                 </div>
             </CardContent>
             </Card>
-            <Button type="submit" size="lg" className="w-full" disabled={isPlacingOrder}>
-                {isPlacingOrder && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Place Order
-            </Button>
+             {paymentMethod === 'mobile-money' ? (
+                <PaystackButton config={paystackConfig} onSuccess={onPaystackSuccess} onClose={onPaystackClose}>
+                    {isPlacingOrder ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Pay {currencySymbol}{total.toFixed(2)}
+                </PaystackButton>
+            ) : (
+                <Button type="submit" size="lg" className="w-full" disabled={isPlacingOrder} onClick={handlePlaceOrder}>
+                    {isPlacingOrder && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Place Order
+                </Button>
+            )}
         </div>
         </div>
     </form>
   );
 }
-
-    
