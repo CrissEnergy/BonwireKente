@@ -22,6 +22,8 @@ import type { Order } from '@/lib/types';
 import { CURRENCIES } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ghanaRegions } from '@/lib/ghana-regions';
+import { usePaystackPayment } from 'react-paystack';
+import type { PaystackProps } from 'react-paystack/dist/types';
 
 
 export function CheckoutClient() {
@@ -32,76 +34,115 @@ export function CheckoutClient() {
   const router = useRouter();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState('');
+  const [formData, setFormData] = useState<any>(null);
 
 
   const subtotal = cart.reduce((sum, item) => sum + item.price[currency.toLowerCase() as keyof typeof item.price] * item.quantity, 0);
   const total = subtotal; // Shipping is free for now
   const currencySymbol = CURRENCIES[currency].symbol;
 
-  const handlePlaceOrder = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!user || !firestore || cart.length === 0) return;
-
-    setIsPlacingOrder(true);
-    
-    const formData = new FormData(event.currentTarget);
-    const formProps = Object.fromEntries(formData.entries());
-
-    let shippingAddress;
+  const getShippingAddress = (formProps: any) => {
     if (currency === 'GHS') {
-        shippingAddress = `${formProps.specificAddress}, ${formProps.city}, ${selectedRegion}, Ghana. Phone: ${formProps.phone}. Digital Address: ${formProps.digitalAddress || 'N/A'}`;
-    } else {
-        shippingAddress = `${formProps.address}, ${formProps.city}, ${formProps.country}. Postal: ${formProps['postal-code'] || 'N/A'}`;
+        return `${formProps.specificAddress}, ${formProps.city}, ${selectedRegion}, Ghana. Phone: ${formProps.phone}. Digital Address: ${formProps.digitalAddress || 'N/A'}`;
     }
+    return `${formProps.address}, ${formProps.city}, ${formProps.country}. Postal: ${formProps['postal-code'] || 'N/A'}`;
+  }
+
+  const createOrderInFirestore = (paymentRef?: string) => {
+    if (!user || !firestore || cart.length === 0 || !formData) return;
+    
+    setIsPlacingOrder(true);
+
+    const shippingAddress = getShippingAddress(formData);
     
     const orderData: Omit<Order, 'id'> = {
         userId: user.uid,
         orderDate: new Date().toISOString(),
         totalAmount: total,
-        currency: currency, // Save the currency with the order
-        shippingAddress, // Use the constructed address
-        paymentMethod: formProps.paymentMethod as string,
-        status: 'Pending',
+        currency: currency, 
+        shippingAddress, 
+        paymentMethod: formData.paymentMethod as string,
+        status: paymentRef ? 'Processing' : 'Pending', // If there's a payment ref, it's paid.
         items: cart.map(item => ({
             id: item.id,
             name: item.name,
             quantity: item.quantity,
             price: item.price[currency.toLowerCase() as keyof typeof item.price],
             imageUrl: item.imageUrl,
-        }))
+        })),
+        ...(paymentRef && { paymentReference: paymentRef }) // Add payment reference if it exists
     };
 
-    try {
-        const ordersCollectionRef = collection(firestore, `users/${user.uid}/orders`);
-        addDocumentNonBlocking(ordersCollectionRef, orderData)
-            .then(() => {
-                toast({
-                    title: "Order Placed!",
-                    description: "Thank you for your purchase. Your heritage is on its way!",
-                });
-                clearCart();
-                router.push('/account');
-            })
-            .catch(err => {
-                console.error("Error placing order:", err);
-                 toast({
-                    variant: "destructive",
-                    title: "Order Failed",
-                    description: "There was a problem placing your order. Please try again.",
-                });
-            })
-            .finally(() => {
-                 setIsPlacingOrder(false);
+    addDocumentNonBlocking(collection(firestore, `users/${user.uid}/orders`), orderData)
+        .then(() => {
+            toast({
+                title: "Order Placed!",
+                description: "Thank you for your purchase. Your heritage is on its way!",
             });
+            clearCart();
+            router.push('/account');
+        })
+        .catch(err => {
+            console.error("Error saving order:", err);
+             toast({
+                variant: "destructive",
+                title: "Order Save Failed",
+                description: "Your payment was successful, but we failed to save the order. Please contact support.",
+            });
+        })
+        .finally(() => {
+             setIsPlacingOrder(false);
+        });
+  }
 
-    } catch (error) {
-        console.error("Error setting up order placement:", error);
+  const paystackConfig: PaystackProps = {
+        reference: new Date().getTime().toString(),
+        email: formData?.email || user?.email || '',
+        phone: formData?.phone || '',
+        amount: total * 100, // Paystack expects amount in lowest currency unit (pesewas for GHS)
+        publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+        currency: 'GHS',
+    };
+
+    const initializePayment = usePaystackPayment(paystackConfig);
+
+    const onSuccess = (reference: any) => {
+        toast({
+            title: "Payment Successful!",
+            description: `Your payment was successful. Ref: ${reference.reference}`,
+        });
+        createOrderInFirestore(reference.reference);
+    };
+
+    const onClose = () => {
         toast({
             variant: "destructive",
-            title: "Error",
-            description: "An unexpected error occurred. Please refresh and try again.",
+            title: "Payment Closed",
+            description: "You closed the payment popup. Your order was not placed.",
         });
         setIsPlacingOrder(false);
+    };
+
+
+  const handlePlaceOrder = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!user || cart.length === 0) return;
+
+    setIsPlacingOrder(true);
+    
+    const formEl = event.currentTarget;
+    const formEntries = new FormData(formEl);
+    const formProps = Object.fromEntries(formEntries.entries());
+    setFormData(formProps); // Save form data to state
+
+    if (formProps.paymentMethod === 'mobile-money' && currency === 'GHS') {
+        // We need to wait for formData to be set, so we use a short timeout
+        // This is a common pattern when state updates need to be reflected immediately
+        // before another action that depends on that state.
+        setTimeout(() => initializePayment({onSuccess, onClose}), 100);
+    } else {
+        // For other payment methods, create order directly as "Pending"
+        createOrderInFirestore();
     }
   };
 

@@ -46,6 +46,7 @@ export interface Order {
     paymentMethod: string;
     status: OrderStatus;
     items: OrderItem[];
+    paymentReference?: string; // Optional: To store Paystack or other gateway reference
 }
 
     
