@@ -1,9 +1,44 @@
+'use client';
+
 import { CheckoutClient } from './CheckoutClient';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export default function CheckoutPage() {
+    const { user, isUserLoading } = useUser();
+    const router = useRouter();
     const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
+
+    useEffect(() => {
+        if (!isUserLoading && !user) {
+            router.push('/account');
+        }
+    }, [user, isUserLoading, router]);
+
+    if (isUserLoading || !user) {
+        return (
+            <div className="relative min-h-[calc(100vh-4rem)] w-full flex items-center justify-center animate-fade-in-up">
+                {heroImage && (
+                    <Image
+                        src={heroImage.imageUrl}
+                        alt={heroImage.description}
+                        fill
+                        className="object-cover blur-md scale-110"
+                        data-ai-hint={heroImage.imageHint}
+                    />
+                )}
+                <div className="absolute inset-0 bg-black/50" />
+                <div className="relative z-10 flex justify-center items-center">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                </div>
+            </div>
+        );
+    }
+  
     return (
         <div className="relative min-h-[calc(100vh-4rem)] w-full animate-fade-in-up">
              {heroImage && (
