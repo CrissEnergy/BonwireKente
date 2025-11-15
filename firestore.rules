@@ -4,39 +4,27 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- Public Collections ---
-
     /**
-     * @description Public read access for the 'products' collection.
-     * Write access is restricted to authenticated users (admins).
-     * @path /products/{productId}
-     * @allow read: Public read access for all users.
-     * @allow write: Authenticated users can write.
+     * @description
+     * Public read access for the 'products' collection. Anyone can view products.
+     * Write access is restricted to authenticated users (e.g., admins).
      */
     match /products/{productId} {
       allow read: if true;
       allow write: if isSignedIn();
     }
 
-
-    // --- User-Specific Data ---
-
     /**
      * @description Restricts access to user-specific data.
-     * @path /users/{userId}
-     * @principle Enforces document ownership for all user data.
+     * Enforces document ownership for all data under a user's path.
      */
     match /users/{userId}/{document=**} {
       allow read, write: if isOwner(userId);
     }
     
-    // --- Collection Group Rules ---
-    
     /**
      * @description Allows admins to query across all 'orders' collections.
-     * We assume an admin role would be checked here in a real app.
-     * @path /users/{userId}/orders/{orderId}
-     * @allow (list) Signed-in users can list all orders for the admin panel.
+     * This is useful for an admin panel to view all orders in the system.
      */
     match /{path=**}/orders/{orderId} {
       allow list: if isSignedIn();
