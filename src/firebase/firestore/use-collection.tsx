@@ -58,7 +58,7 @@ export function useCollection<T = any>(
   type StateDataType = ResultItemType[] | null;
 
   const [data, setData] = useState<StateDataType>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   useEffect(() => {
@@ -86,29 +86,35 @@ export function useCollection<T = any>(
       },
       (error: FirestoreError) => {
         // This logic extracts the path from either a ref or a query
-        const path: string =
-          memoizedTargetRefOrQuery.type === 'collection'
-            ? (memoizedTargetRefOrQuery as CollectionReference).path
-            : (memoizedTargetRefOrQuery as unknown as InternalQuery)._query.path.canonicalString()
+        const path =
+          'path' in memoizedTargetRefOrQuery
+            ? memoizedTargetRefOrQuery.path
+            : (memoizedTargetRefOrQuery as any)._query?.path.canonicalString();
 
-        const contextualError = new FirestorePermissionError({
-          operation: 'list',
-          path,
-        })
+        if (path) {
+            const contextualError = new FirestorePermissionError({
+              operation: 'list',
+              path,
+            });
+            setError(contextualError);
+            // trigger global error propagation
+            errorEmitter.emit('permission-error', contextualError);
+        } else {
+            // Fallback for unexpected query types
+            setError(error);
+        }
 
-        setError(contextualError)
-        setData(null)
-        setIsLoading(false)
-
-        // trigger global error propagation
-        errorEmitter.emit('permission-error', contextualError);
+        setData(null);
+        setIsLoading(false);
       }
     );
 
     return () => unsubscribe();
   }, [memoizedTargetRefOrQuery]); // Re-run if the target query/reference changes.
-  if(memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
-    throw new Error(memoizedTargetRefOrQuery + ' was not properly memoized using useMemoFirebase');
+
+  if (memoizedTargetRefOrQuery && !(memoizedTargetRefOrQuery as any).__memo) {
+      console.warn('The query/reference passed to useCollection was not created with useMemoFirebase. This can lead to infinite loops.', memoizedTargetRefOrQuery);
   }
+
   return { data, isLoading, error };
 }
