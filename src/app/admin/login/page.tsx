@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -8,95 +7,49 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Phone, KeyRound, Loader2, LogIn } from 'lucide-react';
+import { Shield, Mail, Lock, Loader2, LogIn } from 'lucide-react';
 import { useAuth } from '@/firebase';
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
-import OtpInput from 'react-otp-input';
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from 'next/navigation';
 
-declare global {
-  interface Window {
-    recaptchaVerifier?: RecaptchaVerifier;
-    confirmationResult?: ConfirmationResult;
-  }
-}
+const ADMIN_EMAIL = 'admin@bonwirekente.com';
 
 export default function AdminLoginPage() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
   const auth = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
-  const [phoneNumber, setPhoneNumber] = useState('+233596352632');
-  const [otp, setOtp] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showOtpInput, setShowOtpInput] = useState(false);
 
-  const setupRecaptcha = () => {
-    if (!auth) return;
-    if (window.recaptchaVerifier) {
-      // If verifier exists, ensure it's rendered.
-      window.recaptchaVerifier.render();
-      return;
-    }
-
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      size: 'invisible',
-      callback: () => {
-        // reCAPTCHA solved, allow signInWithPhoneNumber.
-      },
-    });
-  };
-
-  const handleSendOtp = async () => {
+  const handleLogin = async () => {
     setLoading(true);
-    try {
-        if (!auth) throw new Error('Firebase Auth not available');
-        
-        setupRecaptcha();
-        const appVerifier = window.recaptchaVerifier!;
-        const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-        
-        window.confirmationResult = confirmationResult;
-        setShowOtpInput(true);
-        setLoading(false);
-        toast({
-            title: 'OTP Sent',
-            description: `An OTP has been sent to ${phoneNumber}.`,
-        });
-
-    } catch (error: any) {
-        console.error('Error sending OTP:', error);
+    if (email.toLowerCase() !== ADMIN_EMAIL) {
         toast({
             variant: 'destructive',
-            title: 'Failed to Send OTP',
-            description: error.message || 'Please check the phone number and try again.',
+            title: 'Invalid Credentials',
+            description: 'The provided email is not a valid admin account.',
         });
         setLoading(false);
-        // In case of error, reset reCAPTCHA
-        if(window.recaptchaVerifier) {
-            window.recaptchaVerifier.clear();
-        }
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-     if (!window.confirmationResult) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Please request an OTP first.' });
         return;
     }
-    setLoading(true);
+
     try {
-        await window.confirmationResult.confirm(otp);
+        if (!auth) throw new Error('Firebase Auth not available');
+        await signInWithEmailAndPassword(auth, email, password);
         toast({
             title: 'Success!',
             description: "You've been successfully logged in as admin.",
         });
-        // The layout will handle the redirect.
+        router.push('/admin'); // Redirect to admin dashboard on successful login
     } catch (error: any) {
-        console.error('Error verifying OTP:', error);
+        console.error('Error signing in:', error);
         toast({
             variant: 'destructive',
-            title: 'Invalid OTP',
-            description: 'The code you entered is incorrect. Please try again.',
+            title: 'Login Failed',
+            description: 'Please check your password and try again.',
         });
         setLoading(false);
     }
@@ -115,7 +68,6 @@ export default function AdminLoginPage() {
         />
       )}
       <div className="absolute inset-0 bg-black/50" />
-      <div id="recaptcha-container"></div>
       <div className="relative z-10 container flex justify-center">
         <Card className="w-full max-w-md bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl text-white">
           <CardHeader className="text-center">
@@ -124,54 +76,36 @@ export default function AdminLoginPage() {
             </div>
             <CardTitle className="font-headline text-3xl">Admin Access</CardTitle>
             <CardDescription className="text-slate-300">
-              Please verify your identity to proceed.
+              Please enter your admin credentials.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {!showOtpInput ? (
-                <div className="space-y-4">
-                    <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input 
-                            type="tel" 
-                            value={phoneNumber} 
-                            onChange={(e) => setPhoneNumber(e.target.value)} 
-                            className="pl-10 h-12 text-lg"
-                            readOnly // Since it's a fixed number
-                        />
-                    </div>
-                    <Button onClick={handleSendOtp} className="w-full h-12 text-lg" disabled={loading}>
-                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-5 w-5" />}
-                        Send Verification Code
-                    </Button>
+            <div className="space-y-4">
+                <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input 
+                        type="email" 
+                        value={email} 
+                        onChange={(e) => setEmail(e.target.value)} 
+                        placeholder="admin@bonwirekente.com"
+                        className="pl-10 h-12 text-lg"
+                    />
                 </div>
-            ) : (
-                <div className="space-y-4">
-                     <div className="relative">
-                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <OtpInput
-                          value={otp}
-                          onChange={setOtp}
-                          numInputs={6}
-                          containerStyle="flex justify-between gap-2"
-                          inputStyle={{
-                              width: '100%',
-                              height: '3rem',
-                              fontSize: '1.25rem',
-                              borderRadius: '0.375rem',
-                              border: '1px solid hsl(var(--input))',
-                              backgroundColor: 'hsl(var(--background) / 0.8)',
-                              color: 'hsl(var(--foreground))',
-                          }}
-                          renderInput={(props) => <input {...props} />}
-                        />
-                    </div>
-                    <Button onClick={handleVerifyOtp} className="w-full h-12 text-lg" disabled={loading || otp.length < 6}>
-                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Verify & Login
-                    </Button>
+                <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input 
+                        type="password" 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password"
+                        className="pl-10 h-12 text-lg"
+                    />
                 </div>
-            )}
+                <Button onClick={handleLogin} className="w-full h-12 text-lg" disabled={loading}>
+                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-5 w-5" />}
+                    Login
+                </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
