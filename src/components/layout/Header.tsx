@@ -169,12 +169,6 @@ export function Header() {
                         <span>My Account</span>
                     </DropdownMenuItem>
                   </Link>
-                  <Link href="/admin" passHref>
-                    <DropdownMenuItem>
-                        <Shield className="mr-2 h-4 w-4" />
-                        <span>Admin</span>
-                    </DropdownMenuItem>
-                  </Link>
                    <DropdownMenuItem onClick={handleSignOut}>
                      <LogOut className="mr-2 h-4 w-4" />
                      <span>Sign Out</span>
