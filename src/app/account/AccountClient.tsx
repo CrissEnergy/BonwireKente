@@ -27,7 +27,8 @@ const signInSchema = z.object({
 });
 
 const signUpSchema = z.object({
-    name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+    firstName: z.string().min(2, { message: "First name must be at least 2 characters." }),
+    lastName: z.string().min(2, { message: "Last name must be at least 2 characters." }),
     email: z.string().email({ message: "Invalid email address." }),
     password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
@@ -47,7 +48,7 @@ export function AccountClient() {
 
   const signUpForm = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { name: "", email: "", password: "" },
+    defaultValues: { firstName: "", lastName: "", email: "", password: "" },
   });
 
   const handleSignIn = (values: z.infer<typeof signInSchema>) => {
@@ -56,7 +57,8 @@ export function AccountClient() {
 
   const handleSignUp = async (values: z.infer<typeof signUpSchema>) => {
       try {
-        await initiateEmailSignUp(auth, values.email, values.password, values.name);
+        const displayName = `${values.firstName} ${values.lastName}`;
+        await initiateEmailSignUp(auth, values.email, values.password, displayName);
       } catch (error) {
           console.error("Sign up error", error);
       }
@@ -222,21 +224,38 @@ export function AccountClient() {
             <CardContent>
                 <Form {...signUpForm}>
                     <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-6">
-                        <FormField
-                            control={signUpForm.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="relative">
-                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                        <FormControl>
-                                            <Input placeholder="Your Name" {...field} className="pl-10"/>
-                                        </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={signUpForm.control}
+                                name="firstName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <div className="relative">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <FormControl>
+                                                <Input placeholder="First Name" {...field} className="pl-10"/>
+                                            </FormControl>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={signUpForm.control}
+                                name="lastName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <div className="relative">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <FormControl>
+                                                <Input placeholder="Last Name" {...field} className="pl-10"/>
+                                            </FormControl>
+                                        </div>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                         <FormField
                             control={signUpForm.control}
                             name="email"
