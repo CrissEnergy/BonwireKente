@@ -28,7 +28,7 @@ interface ProductFiltersProps {
 }
 
 const currencySettings = {
-    USD: { max: 500, step: 10 },
+    USD: { max: 10000, step: 10 },
     GHS: { max: 8000, step: 100 },
     EUR: { max: 500, step: 10 },
 };
