@@ -5,7 +5,7 @@ import { doc } from 'firebase/firestore';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Product } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
-import { EditProductForm } from './EditProductForm';
+import { AddProductForm } from '../../AddProductForm';
 import { useParams } from 'next/navigation';
 
 
@@ -39,7 +39,7 @@ export default function EditProductPage() {
   
   return (
     <div className="space-y-8">
-      <EditProductForm product={product} />
+      <AddProductForm product={product} />
     </div>
   );
 }

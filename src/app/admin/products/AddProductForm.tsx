@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,13 +14,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, Upload, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirestore, useStorage } from '@/firebase';
-import { collection, doc, setDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Image from 'next/image';
 import { v4 as uuidv4 } from 'uuid';
+import type { Product } from '@/lib/types';
 
 const availableCategories = ['Stoles & Sashes', 'Full Cloths', 'Accessories', 'Ready-to-Wear'] as const;
 const availableTags = ['Unisex', 'For Men', 'For Women', 'Wedding', 'Festival', 'Everyday', 'Traditional', 'Naming Ceremony'] as const;
@@ -40,7 +40,6 @@ const productSchema = z.object({
   tags: z.array(z.string()).refine(value => value.some(item => item), {
     message: 'You have to select at least one tag.',
   }),
-  imageUrl: z.string().optional(),
   featured: z.boolean().default(false).optional(),
 });
 
@@ -50,7 +49,11 @@ type ImageSource = {
   preview: string;
 };
 
-export function AddProductForm() {
+interface AddProductFormProps {
+    product?: Product;
+}
+
+export function AddProductForm({ product }: AddProductFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,19 +62,39 @@ export function AddProductForm() {
   const firestore = useFirestore();
   const storage = useStorage();
 
+  const isEditMode = !!product;
+
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
-    defaultValues: {
+    defaultValues: isEditMode ? {
+        name: product.name,
+        patternName: product.patternName,
+        price: product.price,
+        description: product.description,
+        story: product.story,
+        category: product.category,
+        tags: product.tags,
+        featured: product.featured || false,
+    } : {
       name: '',
       patternName: '',
       price: { usd: 0, ghs: 0, eur: 0 },
       description: '',
       story: '',
       tags: [],
-      imageUrl: '',
       featured: false,
     },
   });
+
+  useEffect(() => {
+    if (isEditMode && product.imageUrl) {
+        setImageSource({
+            type: 'url',
+            value: product.imageUrl,
+            preview: product.imageUrl
+        });
+    }
+  }, [product, isEditMode]);
   
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -84,13 +107,11 @@ export function AddProductForm() {
         value: file,
         preview: URL.createObjectURL(file)
       });
-      form.setValue('imageUrl', ''); // Clear URL input if a file is chosen
     }
   };
 
   const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const url = event.target.value;
-    form.setValue('imageUrl', url);
     if(url) {
       setImageSource({
         type: 'url',
@@ -107,7 +128,6 @@ export function AddProductForm() {
         URL.revokeObjectURL(imageSource.preview);
     }
     setImageSource(null);
-    form.setValue('imageUrl', '');
   };
 
   async function onSubmit(values: z.infer<typeof productSchema>) {
@@ -124,13 +144,12 @@ export function AddProductForm() {
     try {
         if (!firestore || !storage) throw new Error("Firebase services not available.");
         
-        const newDocRef = doc(collection(firestore, 'products'));
-        const newProductId = newDocRef.id;
-
         let finalImageUrl: string;
         if(imageSource.type === 'file') {
             const file = imageSource.value as File;
-            const imageRef = ref(storage, `products/${newProductId}/${uuidv4()}-${file.name}`);
+            // Use product ID for path in edit mode, or a new ID for new products
+            const imagePathId = isEditMode ? product.id : uuidv4();
+            const imageRef = ref(storage, `products/${imagePathId}/${file.name}`);
             const snapshot = await uploadBytes(imageRef, file);
             finalImageUrl = await getDownloadURL(snapshot.ref);
         } else {
@@ -138,37 +157,35 @@ export function AddProductForm() {
         }
 
         const productData = {
-          id: newProductId,
-          name: values.name,
-          patternName: values.patternName,
-          price: values.price,
-          description: values.description,
-          story: values.story,
-          category: values.category,
-          tags: values.tags,
-          featured: values.featured,
+          ...values,
           imageUrl: finalImageUrl,
         };
+
+        if (isEditMode) {
+            const productDocRef = doc(firestore, 'products', product.id);
+            await updateDoc(productDocRef, productData);
+            toast({
+                title: 'Product Updated!',
+                description: `${values.name} has been updated.`,
+            });
+        } else {
+            const newDocRef = doc(collection(firestore, 'products'));
+            await setDoc(newDocRef, { ...productData, id: newDocRef.id });
+            toast({
+                title: 'Product Added!',
+                description: `${values.name} has been added to your store.`,
+            });
+        }
         
-        await setDoc(newDocRef, productData);
-        
-        toast({
-            title: 'Product Added!',
-            description: `${values.name} has been added to your store.`,
-        });
-        
-        form.reset();
-        if(imageSource && imageSource.type === 'file') URL.revokeObjectURL(imageSource.preview);
-        setImageSource(null);
         router.push('/admin/products');
         router.refresh();
 
     } catch (error) {
-        console.error("Error adding product: ", error);
+        console.error("Error saving product: ", error);
         toast({
             variant: "destructive",
             title: 'Error',
-            description: 'Failed to add the product. Please try again.',
+            description: 'Failed to save the product. Please try again.',
         });
     } finally {
         setIsSubmitting(false);
@@ -178,7 +195,7 @@ export function AddProductForm() {
   return (
     <Card className="bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl text-white">
       <CardHeader>
-        <CardTitle className="font-headline text-3xl">Add New Product</CardTitle>
+        <CardTitle className="font-headline text-3xl">{isEditMode ? 'Edit Product' : 'Add New Product'}</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -254,18 +271,16 @@ export function AddProductForm() {
                     </Label>
                     <Input id="file-upload" type="file" onChange={handleFileChange} className="hidden" accept="image/*" />
                 </div>
-                 <FormField control={form.control} name="imageUrl" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>...or Paste Image URL</FormLabel>
-                      <FormControl>
-                        <Input 
-                            placeholder="Paste image URL" 
-                            {...field}
-                            onChange={handleUrlChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}/>
+                 <FormItem>
+                    <FormLabel>...or Paste Image URL</FormLabel>
+                    <FormControl>
+                    <Input 
+                        placeholder="Paste image URL" 
+                        defaultValue={isEditMode ? product.imageUrl : ''}
+                        onChange={handleUrlChange}
+                    />
+                    </FormControl>
+                </FormItem>
              </div>
 
             {imageSource && (
@@ -321,10 +336,11 @@ export function AddProductForm() {
                 )}/>
 
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-4">
+              <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
               <Button type="submit" size="lg" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add Product
+                {isEditMode ? 'Save Changes' : 'Add Product'}
               </Button>
             </div>
           </form>
