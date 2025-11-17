@@ -112,7 +112,7 @@ export function Header() {
           
           <Link href="/" className="flex items-center space-x-2">
             <KentePatternIcon className="h-8 w-8" />
-            <span className="font-bold font-headline text-xl">BonwireKente</span>
+            <span className="font-bold font-headline text-xl sr-only">BonwireKente</span>
           </Link>
           
           {/* Dummy div to balance the flex container */}
