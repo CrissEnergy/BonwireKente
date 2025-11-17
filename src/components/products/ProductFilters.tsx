@@ -62,7 +62,7 @@ export function ProductFilters({ filters, setFilters }: ProductFiltersProps) {
     };
 
     return (
-        <Card className="sticky top-20 bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
+        <Card className="lg:sticky lg:top-20 bg-card/60 backdrop-blur-xl border-white/20 shadow-2xl">
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Filters</CardTitle>
             </CardHeader>

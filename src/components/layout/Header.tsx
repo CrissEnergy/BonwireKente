@@ -78,45 +78,48 @@ export function Header() {
 
         {/* Mobile Nav & Layout */}
         <div className="flex w-full items-center justify-between md:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="bg-background/80 backdrop-blur-lg">
-              <SheetHeader className="border-b pb-4 mb-4">
-                  <SheetTitle>
-                    <SheetClose asChild>
-                        <Link href="/" className="mr-6 flex items-center space-x-2">
-                            <KentePatternIcon className="h-8 w-8" />
-                            <span className="font-bold font-headline text-2xl">BonwireKente</span>
-                        </Link>
-                    </SheetClose>
-                  </SheetTitle>
-              </SheetHeader>
-              <nav className="flex flex-col space-y-2">
-                {navLinks.map(link => (
-                  <Fragment key={link.href}>
-                    <SheetClose asChild>
-                      <Link href={link.href} className="text-lg transition-colors hover:text-primary p-2 rounded-md">
-                        {link.label}
-                      </Link>
-                    </SheetClose>
-                  </Fragment>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+            <div className="flex-1 flex justify-start">
+                <Sheet>
+                    <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <Menu className="h-6 w-6" />
+                        <span className="sr-only">Toggle Menu</span>
+                    </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="bg-background/80 backdrop-blur-lg">
+                    <SheetHeader className="border-b pb-4 mb-4">
+                        <SheetTitle>
+                            <SheetClose asChild>
+                                <Link href="/" className="mr-6 flex items-center space-x-2">
+                                    <KentePatternIcon className="h-8 w-8" />
+                                    <span className="font-bold font-headline text-2xl">BonwireKente</span>
+                                </Link>
+                            </SheetClose>
+                        </SheetTitle>
+                    </SheetHeader>
+                    <nav className="flex flex-col space-y-2">
+                        {navLinks.map(link => (
+                        <Fragment key={link.href}>
+                            <SheetClose asChild>
+                            <Link href={link.href} className="text-lg transition-colors hover:text-primary p-2 rounded-md">
+                                {link.label}
+                            </Link>
+                            </SheetClose>
+                        </Fragment>
+                        ))}
+                    </nav>
+                    </SheetContent>
+                </Sheet>
+            </div>
           
-          <Link href="/" className="flex items-center space-x-2">
-            <KentePatternIcon className="h-8 w-8" />
-            <span className="font-bold font-headline text-xl sr-only">BonwireKente</span>
-          </Link>
+            <div className="flex-1 flex justify-center">
+                <Link href="/" className="flex items-center space-x-2">
+                    <KentePatternIcon className="h-8 w-8" />
+                    <span className="font-bold font-headline text-xl sr-only sm:not-sr-only md:sr-only">BonwireKente</span>
+                </Link>
+            </div>
           
-          {/* Dummy div to balance the flex container */}
-          <div className="w-8"></div>
+          <div className="flex-1 flex justify-end"></div>
         </div>
 
 

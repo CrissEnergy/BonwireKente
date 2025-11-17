@@ -268,7 +268,7 @@ export function CheckoutClient() {
                                 <RadioGroupItem value="stripe" id="stripe" />
                                 <span className="font-semibold">Credit / Debit Card</span>
                             </div>
-                            <div className="relative h-8 ml-8">
+                            <div className="relative h-6 sm:h-8 ml-8">
                                 <Image src="https://www.nicepng.com/png/detail/392-3926074_credit-or-debit-card-visa-mastercard-logo-hd.png" alt="Credit/Debit Card Logos" fill style={{objectFit: 'contain', objectPosition: 'left'}}/>
                             </div>
                         </Label>
@@ -278,7 +278,7 @@ export function CheckoutClient() {
                                 <RadioGroupItem value="paypal" id="paypal" />
                                 <span className="font-semibold">PayPal</span>
                             </div>
-                            <div className="relative h-8 ml-8">
+                            <div className="relative h-6 sm:h-8 ml-8">
                                 <Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/2560px-PayPal.svg.png" alt="PayPal Logo" fill style={{objectFit: 'contain', objectPosition: 'left'}}/>
                             </div>
                         </Label>
@@ -289,7 +289,7 @@ export function CheckoutClient() {
                                     <RadioGroupItem value="mobile-money" id="mobile-money" />
                                     <span className="font-semibold">Mobile Money (Ghana)</span>
                                 </div>
-                                <div className="ml-8 flex items-center gap-4 h-8">
+                                <div className="ml-8 flex items-center gap-4 h-6 sm:h-8">
                                     <div className="relative h-full w-12">
                                          <Image src="https://logos-world.net/wp-content/uploads/2023/01/MTN-Logo.png" alt="MTN Mobile Money" fill style={{objectFit: 'contain'}} />
                                     </div>

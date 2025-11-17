@@ -74,7 +74,7 @@ export default function AdminOrdersPage() {
             <TableHeader>
               <TableRow className="hover:bg-white/10 border-b-white/20">
                 <TableHead>Order ID</TableHead>
-                <TableHead>User ID</TableHead>
+                <TableHead className="hidden md:table-cell">User ID</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Status</TableHead>
@@ -92,7 +92,7 @@ export default function AdminOrdersPage() {
               {!isLoading && orders && orders.map(order => (
                 <TableRow key={order.id} className="hover:bg-white/10 border-b-white/20">
                   <TableCell className="font-medium font-mono text-xs">{order.id.substring(0,8)}...</TableCell>
-                  <TableCell className="font-mono text-xs">{order.userId.substring(0,8)}...</TableCell>
+                  <TableCell className="font-mono text-xs hidden md:table-cell">{order.userId.substring(0,8)}...</TableCell>
                   <TableCell>{new Date(order.orderDate).toLocaleDateString()}</TableCell>
                   <TableCell>{formatPrice(order.totalAmount)}</TableCell>
                   <TableCell>
